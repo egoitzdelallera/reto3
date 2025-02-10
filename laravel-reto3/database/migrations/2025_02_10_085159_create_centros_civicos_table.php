@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('centros_civicos', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('nombre');
+            $table->bigInteger('ubicacion');
+            $table->bigInteger('longitud');
+            $table->bigInteger('latitud');
+            $table->string('url');
+            $table->string('telefono');
+            $table->string('correo');
         });
     }
 

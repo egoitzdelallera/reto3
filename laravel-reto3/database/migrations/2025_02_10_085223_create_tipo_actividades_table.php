@@ -13,7 +13,12 @@ return new class extends Migration
     {
         Schema::create('tipo_actividades', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('nombre');
+            $table->string('descripcion');
+            $table->string('idioma');
+            $table->bigInteger('edad_min');
+            $table->bigInteger('edad_max');
+            $table->string('multimedia');
         });
     }
 
