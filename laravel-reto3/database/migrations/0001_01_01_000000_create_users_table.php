@@ -16,10 +16,8 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('correo')->unique();
             $table->enum('tipo', ['admin', 'ciudadano'])->default('ciudadano');
-            $table->bigInteger('ubicacion');
-            $table->string('contrasena');
+            $table->string('password');
             $table->string('telefono');
-            $table->rememberToken();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
