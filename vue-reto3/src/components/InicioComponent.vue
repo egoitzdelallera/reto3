@@ -1,46 +1,51 @@
 <template>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <div class="titulo">EXPLORA Y APÚNTATE <br> EN ACTIVIDADES</div>
-    <div class="filtros">
-        <div class="filtro">
-            <select id="actividades">
-                <option value="Centro civico" select hidden>Centro civico</option>
-                <option value="deporte">centro1</option>
-                <option value="recreacion">centro2</option>
-                <option value="comida">centro3</option>
-                <option value="otros">centro4</option>
-            </select>
-            <select id="edad">
-                <option value="edad" select hidden>Edad</option>
-                <option value="deporte">centro1</option>
-                <option value="recreacion">centro2</option>
-                <option value="comida">centro3</option>
-                <option value="otros">centro4</option>
-            </select>
-            <select id="idioma">
-                <option value="idioma" select hidden>Idioma</option>
-                <option value="deporte">centro1</option>
-                <option value="recreacion">centro2</option>
-                <option value="comida">centro3</option>
-                <option value="otros">centro4</option>
-            </select>
-            <select id="horario">
-                <option value="horario" select hidden>Horario</option>
-                <option value="deporte">centro1</option>
-                <option value="recreacion">centro2</option>
-                <option value="comida">centro3</option>
-                <option value="otros">centro4</option>
-            </select>
+    <div class="container-fluid bg-black">
+        <div class="row justify-content-center">
+        <div class="col-5">
+            <div class="titulo w-100">eXplora y apúNtate en actividadEs</div>
         </div>
-        <div class="buscador">
-            <input type="text" name="Buscador" id="Buscador" placeholder="Busca una actividad">
+    </div>
+    <div class="row justify-content-center mt-3">
+        <div class="col-4">
+            <div class="filtro border border-white rounded d-flex justify-content-around">
+                <select id="actividades">
+                    <option value="Centro civico" select hidden>Centro civico</option>
+                    <option value="deporte">centro1</option>
+                    <option value="recreacion">centro2</option>
+                    <option value="comida">centro3</option>
+                    <option value="otros">centro4</option>
+                </select>
+                <select id="edad">
+                    <option value="edad" select hidden>Edad</option>
+                    <option value="deporte">centro1</option>
+                    <option value="recreacion">centro2</option>
+                    <option value="comida">centro3</option>
+                    <option value="otros">centro4</option>
+                </select>
+                <select id="idioma">
+                    <option value="idioma" select hidden>Idioma</option>
+                    <option value="deporte">centro1</option>
+                    <option value="recreacion">centro2</option>
+                    <option value="comida">centro3</option>
+                    <option value="otros">centro4</option>
+                </select>
+                <select id="horario">
+                    <option value="horario" select hidden>Horario</option>
+                    <option value="deporte">centro1</option>
+                    <option value="recreacion">centro2</option>
+                    <option value="comida">centro3</option>
+                    <option value="otros">centro4</option>
+                </select>
+            </div>
         </div>
     </div>
     <div class="actividades">
         <div class="custom-cursor"></div>
         <div class="slider-container">
+            
             <div class="slider"></div>
         </div>
+    </div>
     </div>
 </template>
 
@@ -48,7 +53,9 @@
 .titulo {
     text-align: center;
     font-size: 4em;
-    letter-spacing: 2px;
+    font-family: Dirtyline;
+    color: white;
+    line-height: 1; /* Añade espacio entre líneas de párrafo */
 }
 
 #actividades, #edad, #idioma, #horario {
@@ -59,50 +66,20 @@
 }
 
 #actividades option, #edad option, #idioma option, #horario option {
-    background-color: #0a0a0a;
+    background-color: #000000;
     color: white;
     padding: 10px;
     border: none;
     cursor: pointer;
 }
 
-.filtro {
-    display: flex;
-    width: 25%;
-    justify-content: space-between;
-    border: 2px solid white;
-    border-radius: 20px;
-    padding: 10px;
-}
-
-.filtros {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px;
-    width: 100%;
-}
-
-.buscador {
-    padding: 10px;
-    width: 15%;
-    margin-right: 2%;
-}
-
-.buscador input {
-    background-color: transparent;
-    color: white;
-    border: 2px solid white;
-    border-radius: 10px;
-    padding: 10px;
-    width: 100%;
-}
 
 .slider-container {
     width: 100%;
     position: relative;
     overflow: hidden;
-    margin-bottom:3%;
-    margin-top:3%;  
+    padding-bottom:3%;
+    margin-top:3%;
 }
 
 .slider {
@@ -112,11 +89,11 @@
 
 .slide {
     min-width: 400px;
-    height: 400px;
+    height: 450px;
     margin: 0 10px;
     position: relative;
-    transform: scale(0.8);
-    opacity: 0.6;
+    transform: scale(0.95);
+    opacity: 0.5;
     transition: all 0.3s ease-in-out;
     border-radius: 10px;
     overflow: hidden;
@@ -136,18 +113,19 @@
 
 .slide .info {
     position: absolute;
-    bottom: -20px;
-    left: 20px;
-    color: white;
-    font-size: 2.5em;
-    
+    bottom: -55px;
+    left: 10px;
+    color: rgb(0, 0, 0);
+    font-size: 4em;
+    font-family:Inter;
+    font-weight:700;
     padding: 10px;
-    border-radius: 5px;
-    width: 90%;
+    letter-spacing: -0.05em;
+    border-radius: .5px;
+    width: 97%;
     display: flex;
     align-items: center;
     justify-content:space-between;
-    
 }
 
 .slide .info a {
@@ -157,7 +135,7 @@
     font-size: 1.5em;
     cursor: pointer;
     color:black;
-    
+    margin-bottom: .2em;
 }
 
 .custom-cursor {
@@ -202,10 +180,10 @@
 </style>
 
 <script>
-import basketImage from '@/assets/img/basket.jpg';
-import boxeoImage from '@/assets/img/boxeo.jpg';
-import futbolImage from '@/assets/img/futbol.jpg';
-import tenisImage from '@/assets/img/tenis.jpg';
+import basketImage from '@/assets/img/basket.png';
+import boxeoImage from '@/assets/img/boxeo.png';
+import futbolImage from '@/assets/img/futbol.png';
+import tenisImage from '@/assets/img/tenis.png';
 
 class Slider {
     constructor() {

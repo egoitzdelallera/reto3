@@ -1,0 +1,125 @@
+/* style.css - Modified based on Web Interface Design Guide */
+
+/*  General Resets and Base Styles (Your Original) */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Helvetica';
+    font-weight: 200;
+}
+
+/*  Fonts */
+@font-face {
+    font-family: 'Dirtyline';
+    src: url('../fuentes/Dirtyline.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('../fuentes/Inter-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Inter';
+    src: url('../fuentes/Inter-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'Inter';
+    src: url('../fuentes/Inter-SemiBold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+
+
+body {
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    -webkit-font-smoothing: antialiased; /* Legibility */
+    text-rendering: optimizeLegibility; /* Legibility */
+    -webkit-text-size-adjust: 100%; /* Prevent iOS landscape zoom issue */
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 500; /* Default medium heading weight - adjust as needed */
+    /* Example of fluid font sizing. Adjust values as needed */
+    /* font-size: clamp(24px, 3vw, 36px);  Remove the comment to apply*/
+}
+
+/* Tables and Numerical Data */
+.tabular-nums {
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Interactivity Enhancements --- */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+    /* Remove default styles that may interfere with custom styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Consider disabling spellcheck and autocomplete where appropriate */
+    /* spellcheck: false;  Remove the comment to apply*/
+    /* autocomplete: off;  Remove the comment to apply*/
+    font-size: 16px; /* Prevent iOS zoom */
+}
+
+button:disabled {
+   /* Remove default cursor: not-allowed */
+   cursor: default;
+}
+
+/*  Interactive Elements: Disable User Select */
+button,
+a,
+[tabindex] { /* Elements that can receive focus */
+    -webkit-user-select: none;  /* Safari */
+    -moz-user-select: none;     /* Firefox */
+    -ms-user-select: none;      /* IE10+/Edge */
+    user-select: none;          /* Standard syntax */
+}
+
+
+/*  Decorative Elements:  Disable Pointer Events (Important!) */
+.decorative {
+    pointer-events: none;
+}
+
+/* --- Motion Preferences (Important for Themes) --- */
+/* Add a class to the body when switching themes to disable transitions */
+body.theme-switching * {
+  transition: none !important;
+  animation: none !important;
+}
+
+:focus {
+   outline: none; 
+    box-shadow: none; 
+}
+
+
+
+a, button {
+    -webkit-tap-highlight-color: rgba(0,0,0,0); 
+}
+
+
+.icon-button {
+   text-indent: -999px;
+   overflow: hidden;
+}
+
+
+
+.smooth-scroll{
+scroll-behavior: smooth;
+}

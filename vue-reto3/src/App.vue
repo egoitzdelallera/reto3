@@ -16,7 +16,6 @@ import InicioView from './views/InicioView.vue'
     <div class="footer">
       <FooterView />
     </div>
-    
   </div>
 </template>
 
@@ -25,7 +24,6 @@ import InicioView from './views/InicioView.vue'
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  
 }
 
 main {
