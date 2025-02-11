@@ -18,9 +18,12 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'nombre',
+        'correo',
+        'tipo',
+        'ubicacion',
+        'contrasena',
+        'correo'
     ];
 
     /**
@@ -29,7 +32,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
+        'contrasena',
         'remember_token',
     ];
 
@@ -44,5 +47,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function actividades()
+    {
+        return $this->belongsToMany(Actividad::class, 'actividades_usuarios', 'id_usuario', 'id_actividad');
     }
 }

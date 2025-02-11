@@ -522,6 +522,12 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
 
     public static $classMap = array (
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Models\\Actividad' => __DIR__ . '/../..' . '/app/Models/Actividad.php',
+        'App\\Models\\ActividadesUsuario' => __DIR__ . '/../..' . '/app/Models/ActividadesUsuario.php',
+        'App\\Models\\CentroCivico' => __DIR__ . '/../..' . '/app/Models/CentroCivico.php',
+        'App\\Models\\Horario' => __DIR__ . '/../..' . '/app/Models/Horario.php',
+        'App\\Models\\Monitor' => __DIR__ . '/../..' . '/app/Models/Monitor.php',
+        'App\\Models\\TiposActividad' => __DIR__ . '/../..' . '/app/Models/TiposActividad.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
