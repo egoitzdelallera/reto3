@@ -1,17 +1,15 @@
 <script setup>
 import NavView from './views/NavView.vue'
 import FooterView from './views/FooterView.vue'
-import InicioView from './views/InicioView.vue'
 </script>
 
 <template>
-  
   <div id="app">
     <div class="nav">
       <NavView />
     </div>
-    <div class="inicio">
-      <InicioView />
+    <div class="content">
+      <router-view></router-view>
     </div>
     <div class="footer">
       <FooterView />
@@ -26,22 +24,17 @@ import InicioView from './views/InicioView.vue'
   min-height: 100vh;
 }
 
-main {
-  
+.nav {
   width: 100%;
   height: 10%;
 }
 
-.nav{
+.content {
   width: 100%;
-  height: 10%;
+  flex-grow: 1;
 }
 
-.inicio{
-  width: 100%;
-  height: 80%;
-}
-.footer{
+.footer {
   width: 100%;
   height: 10%;
 }
