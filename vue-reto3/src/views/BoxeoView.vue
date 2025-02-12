@@ -1,1 +1,9 @@
-<template><h1>esto es boxeo</h1></template>
+<script setup>
+import BoxeoComponente from '../components/BoxeoComponent.vue'
+</script>
+
+<template>
+    
+        <BoxeoComponente />
+    
+</template>
