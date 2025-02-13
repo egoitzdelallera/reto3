@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\CentroCivico;
+use Validator;
 
 class CentroCivicoController extends Controller
 {
@@ -11,7 +13,7 @@ class CentroCivicoController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(CentroCivico::all());
     }
 
     /**
@@ -19,7 +21,7 @@ class CentroCivicoController extends Controller
      */
     public function create()
     {
-        //
+        
     }
 
     /**
@@ -27,7 +29,22 @@ class CentroCivicoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'ubicacion' => 'required|string|max:255',
+            'longitud' => 'required|numeric',
+            'latitud' => 'required|numeric',
+            'url' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:255',
+            'correo' => 'nullable|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $centroCivico = CentroCivico::create($request->all());
+        return response()->json(['message' => 'Centro cívico creado correctamente', 'data' => $centroCivico], 201);
     }
 
     /**
@@ -35,7 +52,13 @@ class CentroCivicoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $centroCivico = CentroCivico::find($id);
+
+        if (!$centroCivico) {
+            return response()->json(['message' => 'Centro cívico no encontrado'], 404);
+        }
+
+        return response()->json($centroCivico);
     }
 
     /**
@@ -51,7 +74,28 @@ class CentroCivicoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $centroCivico = CentroCivico::find($id);
+
+        if (!$centroCivico) {
+            return response()->json(['message' => 'Centro cívico no encontrado'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'sometimes|string|max:255',
+            'ubicacion' => 'sometimes|string|max:255',
+            'longitud' => 'sometimes|numeric',
+            'latitud' => 'sometimes|numeric',
+            'url' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:255',
+            'correo' => 'nullable|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $centroCivico->update($request->all());
+        return response()->json(['message' => 'Centro cívico actualizado correctamente', 'data' => $centroCivico]);
     }
 
     /**
@@ -59,6 +103,13 @@ class CentroCivicoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $centroCivico = CentroCivico::find($id);
+
+        if (!$centroCivico) {
+            return response()->json(['message' => 'Centro cívico no encontrado'], 404);
+        }
+
+        $centroCivico->delete();
+        return response()->json(['message' => 'Centro cívico eliminado correctamente'], 200);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Monitor;
+use Validator;
 
 class MonitorController extends Controller
 {
@@ -11,7 +13,7 @@ class MonitorController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json(Monitor::all());
     }
 
     /**
@@ -27,7 +29,21 @@ class MonitorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'foto' => 'required|email|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $monitor = Monitor::create($request->all());
+
+        return response()->json(['message' => 'Monitor creado correctamente', 'data' => $monitor], 201);
+
+
     }
 
     /**
@@ -35,7 +51,13 @@ class MonitorController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $monitor = Monitor::find($id);
+
+        if (!$monitor) {
+            return response()->json(['message' => 'Monitor no encontrado'], 404);
+        }
+
+        return response()->json(['data' => $monitor], 200);
     }
 
     /**
@@ -51,7 +73,15 @@ class MonitorController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $monitor = Monitor::find($id);
+
+        if (!$monitor) {
+            return response()->json(['message' => 'Monitor no encontrado'], 404);
+        }
+
+        $monitor->update($request->all());
+
+        return response()->json(['message' => 'Monitor actualizado correctamente', 'data' => $monitor], 200);
     }
 
     /**
@@ -59,6 +89,12 @@ class MonitorController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $monitor = Monitor::find($id);
+
+        if (!$monitor) {
+            return response()->json(['message' => 'Monitor no encontrado'], 404);
+        }
+        $monitor->delete();
+        return response()->json(['message' => 'Monitor eliminado correctamente'], 200);
     }
 }

@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('monitores', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
+            $table->string('apellido');
             $table->string('foto');
-            $table->timestamps();
         });
     }
 
