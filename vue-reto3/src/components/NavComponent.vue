@@ -12,7 +12,7 @@
           </div>
         </div>
         <div class="inicio_sesion">
-          <a href="#" class="btn_login">Iniciar sesión</a>
+          <button @click="goToLogin">Iniciar Sesión</button>
         </div>
       </div>
     </nav>
@@ -68,3 +68,13 @@
     
   }
 </style>
+
+<script>
+export default {
+  methods: {
+    goToLogin() {
+      this.$router.push('/login'); // Asegúrate de tener definida la ruta '/login' en tu Vue Router
+    }
+  }
+};
+</script>
