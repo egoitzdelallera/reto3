@@ -11,14 +11,15 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-
 Route::middleware('auth:api')->group(function () {
     Route::get('/actividades', [ActividadController::class, 'index']);
-    Route::get('/actividad/{id}', [ActividadController::class, 'show']);
+    
 
     Route::post('/actividades/crear', [ActividadController::class, 'store']);
     Route::put('/actividades/{id}', [ActividadController::class, 'update']);
     Route::delete('/actividades/{id}', [ActividadController::class, 'destroy']);
 });
+
+Route::get('/actividad/{id}', [ActividadController::class, 'show']);
 
 
