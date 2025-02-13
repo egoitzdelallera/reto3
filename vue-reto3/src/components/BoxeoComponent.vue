@@ -1,274 +1,383 @@
 <template>
-    <div class="container">
-      <main class="main-content">
-        <div class="main-left">
-          <h1 class="title">ACTIVIDADES</h1>
-          <h2 class="subtitle">DE BOXEO</h2>
+  <div class="container">
+    <div class="row d-flex flex-nowrap align-items-center">
+      <div class="col-md-6 col-12 titulo">
+        <h1 class="px-4">ACTIVIDADES DE</h1>
+        <h1>{{ categoriaNombre }}</h1>
+      </div>
+
+      <!-- Filters (Absolutely Positioned) -->
+      <div class="filters">
+        <div class="filtro rounded d-flex justify-content-around">
+          <select id="edad">
+            <option value="edad" select hidden>Edad</option>
+            <option value="deporte">centro1</option>
+            <option value="recreacion">centro2</option>
+            <option value="comida">centro3</option>
+            <option value="otros">otro4</option>
+          </select>
+          <select id="idioma">
+            <option value="idioma" select hidden>Idioma</option>
+            <option value="deporte">centro1</option>
+            <option value="recreacion">centro2</option>
+            <option value="comida">centro3</option>
+            <option value="otros">otro4</option>
+          </select>
+          <select id="horario">
+            <option value="horario" select hidden>Horario</option>
+            <option value="deporte">centro1</option>
+            <option value="recreacion">centro2</option>
+            <option value="comida">centro3</option>
+            <option value="otros">otros4</option>
+          </select>
         </div>
-        <div class="right-side-container">
-          <div class="right-side-scrollable">
-            <div class="activity-card">
-              <h3 class="activity-title">BOXEO PARA PRINCIPIANTES</h3>
-              <p class="activity-description">
-                Ejercicio y diversión para adultos que quieren estar activos
-                practicando basket en un ambiente relajado.
-              </p>
-              <div class="activity-location">
-                Centro Cívico
-                <span class="location-name">IBAIONDO</span>
+      </div>
+
+      <div class="col-md-6 mt-4 col-12 right-side-scrollable">
+        <div class="right-side">
+          <div v-if="loading">Cargando actividades...</div>
+          <div v-else-if="error">Error al cargar actividades: {{ error }}</div>
+          <div v-else>
+            <div v-for="actividad in actividades" :key="actividad.id" class="activity-block">
+              <div class="row">
+                <div class="col-12">
+                  <h2>{{ actividad.nombre }}</h2>
+                </div>
               </div>
-              <button class="register-button">INSCRÍBETE</button>
-            </div>
-            <div class="activity-card">
-              <h3 class="activity-title">BOXEO PARA PRINCIPIANTES</h3>
-              <p class="activity-description">
-                Ejercicio y diversión para adultos que quieren estar activos
-                practicando basket en un ambiente relajado.
-              </p>
-              <div class="activity-location">
-                Centro Cívico
-                <span class="location-name">IBAIONDO</span>
+              <div class="row">
+                <div class="col-12">
+                  <p>{{ actividad.descripcion }}</p>
+                </div>
               </div>
-              <button class="register-button">INSCRÍBETE</button>
-            </div>
-            <div class="activity-card">
-              <h3 class="activity-title">BOXEO PARA PRINCIPIANTES</h3>
-              <p class="activity-description">
-                Ejercicio y diversión para adultos que quieren estar activos
-                practicando basket en un ambiente relajado.
-              </p>
-              <div class="activity-location">
-                Centro Cívico
-                <span class="location-name">IBAIONDO</span>
+              <div class="row mt-3 d-flex justify-content-center align-items-center">
+                <!-- Placeholder for schedule and center information. Replace with your actual data -->
+                <div class="col-md-4">
+                  <p>Horario Placeholder</p>
+                  <p>Otro Horario</p>
+                </div>
+                <div class="col-md-4">
+                  <p class="center">Centro Civico</p>
+                  <p class="center bold">Ubicacion</p>
+                </div>
+                <div class="col-md-4">
+                  <button>¡Inscríbete!</button>
+                </div>
               </div>
-              <button class="register-button">INSCRÍBETE</button>
-            </div>
-            <div class="activity-card">
-              <h3 class="activity-title">BOXEO PARA PRINCIPIANTES</h3>
-              <p class="activity-description">
-                Ejercicio y diversión para adultos que quieren estar activos
-                practicando basket en un ambiente relajado.
-              </p>
-              <div class="activity-location">
-                Centro Cívico
-                <span class="location-name">IBAIONDO</span>
-              </div>
-              <button class="register-button">INSCRÍBETE</button>
-            </div>
-  
-            <div class="activity-card">
-              <h3 class="activity-title">BOXEO PARA PRINCIPIANTES</h3>
-              <p class="activity-description">
-                Ejercicio y diversión para adultos que quieren estar activos
-                practicando basket en un ambiente relajado.
-              </p>
-              <div class="activity-location">
-                Centro Cívico
-                <span class="location-name">IBAIONDO</span>
-              </div>
-              <button class="register-button">INSCRÍBETE</button>
-            </div>
-  
-            <div class="activity-card-placeholder">
-              <h3 class="activity-title">BOXEO PARA PRINCIPIANTES</h3>
-              <p class="activity-description">
-                Ejercicio y diversión para adultos que quieren estar activos
-                practicando basket en un ambiente relajado.
-              </p>
-              <div class="activity-location">
-                Centro Cívico
-                <span class="location-name">IBAIONDO</span>
-              </div>
-              <button class="register-button">INSCRÍBETE</button>
             </div>
           </div>
         </div>
-      </main>
+        <div class="scroll-fade"></div>
+      </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    name: "BoxingActivities",
-  };
-  </script>
-  
-  <style scoped>
-  /* General styles */
+  </div>
+</template>
+
+<script>
+import { computed, watch, onMounted, ref } from 'vue';
+import useActividades from '../composables/useActividades';
+import useCategorias from '../composables/useCategorias';
+import { useRoute } from 'vue-router';
+
+export default {
+  setup() {
+    const route = useRoute();
+    const { actividades, loading, error, categoryId, setCategory, fetchActividades } = useActividades();
+    const { categorias, fetchCategorias } = useCategorias();
+
+
+    const categoriaNombre = computed(() => {
+      const categoria = categorias.value.find(cat => cat.id === categoryId.value);
+      return categoria ? categoria.nombre.toUpperCase() : 'ACTIVIDAD';
+    });
+
+    watch(categoryId, (newCategoryId) => {
+      if (newCategoryId) {
+        fetchActividades();
+      }
+    });
+
+    onMounted(async () => {
+      await fetchCategorias();
+
+      // Determine initial category based on the route path
+      let initialCategoryId = null;
+      switch (route.path) {
+        case '/boxeo':
+          initialCategoryId = 3; // Replace with the actual category ID for boxeo
+          break;
+        case '/tenis':
+          initialCategoryId = 2; // Replace with the actual category ID for tenis
+          break;
+        case '/baloncesto':
+          initialCategoryId = 1; // Replace with the actual category ID for baloncesto
+          break;
+        case '/futbol':
+          initialCategoryId = 4;  // Replace with the actual category ID for futbol
+          break;
+        // Add more cases as needed
+        default:
+          console.warn('Unknown route:', route.path);
+      }
+
+      if (initialCategoryId) {
+        setCategory(initialCategoryId);
+        await fetchActividades();
+      }
+    });
+
+    return {
+      actividades,
+      loading,
+      error,
+      categoriaNombre,
+      categorias: computed(() => categorias.value),
+    };
+  }
+};
+</script>
+
+<style scoped>
+/* Base styles */
+.container {
+  display: flex;
+  font-family: sans-serif;
+  color: white;
+  background-color: #c1272d;
+  padding: 0;
+  min-height: 100vh;
+  max-width: 100vw;
+}
+
+.titulo {
+  margin-top: 1.9em;
+  margin-left: 1.1em;
+}
+
+.titulo h1 {
+  font-size: 1.8em;
+  font-family: Thunder;
+  text-align: left;
+  margin: 0;
+  font-weight: 800;
+  font-style: italic;
+  line-height: 0.9;
+}
+
+/* Right side: Scrollable Activity Blocks */
+.right-side-scrollable {
+  overflow-y: auto;
+  position: relative;
+  /* Required for absolute positioning of fade */
+  height: 100vh;
+  padding: 20px 0;
+  margin-top: 5% 5% 0% 0%;
+}
+
+/* Scrollbar Styling */
+.right-side-scrollable::-webkit-scrollbar {
+  width: 12px;
+  /* Width of the scrollbar */
+}
+
+.right-side-scrollable::-webkit-scrollbar-track {
+  height: 80%;
+  width: 8px;
+}
+
+.right-side-scrollable::-webkit-scrollbar-thumb {
+  background: #000000;
+  /* Color of the scroll thumb */
+  border-radius: 8px;
+  /* Rounded corners of the scroll thumb */
+  width: 12px !important;
+}
+
+.right-side-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  /* Color of the scroll thumb on hover */
+}
+
+
+.right-side {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+
+}
+
+/* Activity block styles */
+.activity-block {
+  background-color: black;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 25px;
+  position: relative;
+  overflow: hidden;
+
+}
+
+.activity-block.faded {
+  opacity: 0.3;
+  background-color: #d92027;
+}
+
+.activity-block h2 {
+  margin: 0;
+  font-size: 4em;
+  font-family: Thunder;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.activity-block p {
+  margin-bottom: 0px;
+  font-family: Inter;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+
+}
+
+.activity-block .center {
+
+  font-size: .85em;
+  margin-top: -1.9em;
+}
+
+.activity-block .bold {
+  font-weight: 700;
+  font-style: normal;
+  font-family: Thunder;
+  margin-top: -.3em;
+  font-size: 3em;
+  padding-top: 0em;
+  margin-bottom: -1em;
+  letter-spacing: 0.00em;
+
+}
+
+.activity-block button {
+  background-color: white;
+  color: black;
+  border: none;
+  padding: 3px 24px 0px 20px;
+  cursor: pointer;
+  border-radius: 55px;
+  margin-bottom: -.2em;
+  margin-left: .5em;
+  font-weight: 700;
+  font-style: italic;
+  font-size: 2.5em;
+  font-family: Thunder;
+
+}
+
+.activity-block .schedule {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+}
+
+/* Scroll Fade Effect */
+.scroll-fade {
+  z-index: 998;
+  position: sticky;
+  bottom: -21px;
+  /* Adjusted to move the fade a bit lower */
+  left: 0;
+  width: 100%;
+  height: 450px;
+  /* Increased the height of the fade */
+  background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #c1272d);
+  /* Adjusted to move the fade a bit lower */
+  left: 0;
+  width: 100%;
+  height: 450px;
+  /* Increased the height of the fade */
+  background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #c1272d);
+  /* Gradient from transparent to #c1272d */
+  pointer-events: none;
+  /* Ensure the fade doesn't interfere with scrolling */
+}
+
+/* Filters (Absolutely Positioned) */
+.filters {
+  position: absolute;
+  top: 100px;
+  /* Adjust as needed to position below the title */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  /* Ensure filters are above other content */
+  width: 100%;
+  /* Ancho completo */
+  padding: 0 15px;
+  /* Espacio a los lados */
+  box-sizing: border-box;
+  /* Asegura que padding no aumente el ancho */
+}
+
+.filtro {
+  background-color: black;
+  color: white;
+  margin: 0 auto;
+  /* Centra horizontalmente */
+  max-width: 500px;
+  /* Ancho máximo del filtro */
+}
+
+.filtro select {
+  background-color: transparent !important;
+  color: white;
+  border: 0px;
+  padding: 10px;
+  font-size: 1.5em;
+  font-family: Thunder;
+  /* Asegura que la tipografía se aplique a las opciones */
+  font-weight: 700;
+  font-style: italic;
+}
+
+.filtro option {
+  background-color: #000000;
+  color: white;
+
+}
+
+/* Responsive design (Optional) */
+@media (max-width: 768px) {
   .container {
-    background-color: black;
-    color: white;
-    font-family: sans-serif;
-    height: 90vh;
-    overflow: hidden;
-    display: flex;
     flex-direction: column;
-    max-width: 100vw;
-    background-image: url(../assets/img/fondoBoxeo.jpg);
-  background-repeat: no-repeat;
-  background-size: 108%;
   }
-  
-  /* Header styles */
- 
-  
-  .logo {
-    display: flex;
-    align-items: center;
-  }
-  
-  .logo img {
-    width: 40px;
-    margin-right: 10px;
-  }
-  
-  .navigation {
-    display: flex;
-    align-items: center;
-  }
-  
-  .nav-button,
-  .login {
-    background-color: transparent;
-    color: white;
-    border: 1px solid white;
-    padding: 5px 15px;
-    margin-left: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-  }
-  
-  .nav-button.active {
-    background-color: white;
-    color: black;
-  }
-  
-  /* Main Content styles */
-  .main-content {
-    display: flex;
-    height: calc(100% - 60px);
-    padding: 0px 40px;
-  }
-  
-  .main-left {
-    width: 55%; /* Fixed width for the left side */
-    flex-shrink: 0; /* Prevent shrinking */
-    padding: 20px;
-    position: sticky; /* Make it stick */
-    top: 0;
-    height: 100vh; /* Occupy full viewport height */
-    display: flex;
+
+  .row {
     flex-direction: column;
-    justify-content: center; /* Align items to the top */
-    align-items: flex-start; /* Align items to the left */
-    text-align: left;
-    font-weight: 900;
-    color: white;
-    letter-spacing: 0.1em;
-    font-size: 1.7em;
-    font-style: italic;
   }
-  
-  .title {
-    font-size: 5rem;
-    font-weight: bold;
-    color: #ffff00;
-    margin-bottom: 5px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .subtitle {
-    font-size: 3rem;
-    font-style: italic;
-    color: #ffff00;
-    margin-bottom: 20px;
-    font-family: Arial, sans-serif;
-  }
-  
-  /* Right side: Scrollable Activity Blocks */
-  .right-side-container {
-    width: 50%;
-    height: 100vh; /* Set the height of the container */
-    overflow: hidden;  /*  Prevent the container from overflowing */
-    padding: 30px 20px;
-  }
-  
+
+  .titulo,
   .right-side-scrollable {
     width: 100%;
-    height: 100%; /* Set the height of the scrollable area */
-    overflow-y: auto;  /* Enable vertical scroll */
-    scrollbar-width: thin; /*  thin  auto  none */
-    scrollbar-color: #ffffff transparent;
-    padding-right: 10px; /* Space for the scrollbar */
+    box-sizing: border-box;
+    /* Asegura que padding y border se incluyan en el ancho total */
   }
-  
-  /* Scrollbar Styling */
-  .right-side-scrollable::-webkit-scrollbar {
-    width: 12px; /* Width of the scrollbar */
+
+  .col-md-4 {
+    width: 100%;
+    /* Ancho completo en pantallas pequeñas */
+    box-sizing: border-box;
   }
-  
-  .right-side-scrollable::-webkit-scrollbar-track {
-    background: transparent; /* Color of the track */
-    border-radius: 10px; /* Rounded corners of the track */
-  }
-  
-  .right-side-scrollable::-webkit-scrollbar-thumb {
-    background: #ffffff; /* Color of the scroll thumb */
-    border-radius: 10px; /* Rounded corners of the scroll thumb */
-  }
-  
-  .right-side-scrollable::-webkit-scrollbar-thumb:hover {
-    background: #555; /* Color of the scroll thumb on hover */
-  }
-  
-  .activity-card {
-    border: 1px solid white;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 10px;
+
+  .filters {
     position: relative;
-    z-index: 1;
+    /* Vuelve a la posición normal en pantallas pequeñas */
+    top: auto;
+    left: auto;
+    transform: none;
+    padding: 10px;
   }
-  
-  .activity-card-placeholder {
-    border: 1px solid white;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 10px;
-    position: relative;
-    z-index: 1;
+
+  .filtro {
+    max-width: 100%;
+    margin: 0;
   }
-  
-  .activity-title {
-    font-size: 2rem;
-    font-style: italic;
-    color: #ffff00;
-    margin-bottom: 10px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .activity-description {
-    font-size: 0.9rem;
-    margin-bottom: 15px;
-  }
-  
-  .activity-location {
-    font-size: 0.8rem;
-    margin-bottom: 15px;
-  }
-  
-  .location-name {
-    font-weight: bold;
-    font-style: normal;
-  }
-  
-  .register-button {
-    background-color: #ffff00;
-    color: black;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-weight: bold;
-  }
-  </style>
+}
+</style>

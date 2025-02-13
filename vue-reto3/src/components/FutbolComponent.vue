@@ -9,12 +9,6 @@
       <!-- Filters (Absolutely Positioned) -->
       <div class="filters">
         <div class="filtro rounded d-flex justify-content-around">
-          <select id="actividades" v-model="selectedCategory" @change="onCategoryChange">
-            <option value="" disabled selected hidden>Categorias</option>
-            <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">
-              {{ categoria.nombre }}
-            </option>
-          </select>
           <select id="edad">
             <option value="edad" select hidden>Edad</option>
             <option value="deporte">centro1</option>
@@ -82,12 +76,13 @@
 import { computed, watch, onMounted, ref } from 'vue';
 import useActividades from '../composables/useActividades';
 import useCategorias from '../composables/useCategorias';
+import { useRoute } from 'vue-router';
 
 export default {
   setup() {
+    const route = useRoute();
     const { actividades, loading, error, categoryId, setCategory, fetchActividades } = useActividades();
     const { categorias, fetchCategorias } = useCategorias();
-    const selectedCategory = ref('');
 
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
@@ -95,21 +90,34 @@ export default {
     });
 
     watch(categoryId, (newCategoryId) => {
-      console.log('Categoría seleccionada:', newCategoryId);
       if (newCategoryId) {
         fetchActividades();
       }
     });
 
-    const onCategoryChange = () => {
-      setCategory(parseInt(selectedCategory.value)); // Parse to integer
-      fetchActividades();
-    };
-
     onMounted(async () => {
       await fetchCategorias();
-      await setCategory(2); // Set initial category
-      await fetchActividades();
+      // Determine initial category based on the route
+      let initialCategoryId = null;
+      switch (route.path) {
+        case '/boxeo':
+          initialCategoryId = 3; // Replace with the actual category ID for boxeo
+          break;
+        case '/tenis':
+          initialCategoryId = 2; // Replace with the actual category ID for tenis
+          break;
+        case '/baloncesto':
+          initialCategoryId = 1; // Replace with the actual category ID for baloncesto
+          break;
+        // Add more cases as needed
+        default:
+          console.warn('Unknown route:', route.path);
+      }
+
+      if (initialCategoryId) {
+        setCategory(initialCategoryId);
+        await fetchActividades();
+      }
     });
 
     return {
@@ -117,9 +125,7 @@ export default {
       loading,
       error,
       categoriaNombre,
-      categorias: computed(() => categorias.value), // Expose categorias
-      selectedCategory,
-      onCategoryChange
+      categorias: computed(() => categorias.value),
     };
   }
 };
@@ -135,9 +141,6 @@ export default {
   padding: 0;
   min-height: 100vh;
   max-width: 100vw;
-  background-image: url(../assets/img/fondoCompletoBasket.png);
-  background-repeat: no-repeat;
-  background-size: 67%;
 }
 
 .titulo {
