@@ -59,8 +59,13 @@ class ActividadController extends Controller
      */
     public function show(string $id)
     {
+        $actividades = Actividad::where('id_tipo_actividad', $id)->get();
 
-        return response()->json(Actividad::findOrFail($id));
+        if ($actividades->isEmpty()) {
+            return response()->json(['message' => 'No se encontraron actividades para el tipo de actividad especificado'], 404);
+        }
+
+        return response()->json($actividades);
     }
 
     /**
