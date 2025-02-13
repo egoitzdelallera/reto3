@@ -1,3 +1,9 @@
+<script setup>
+import TenisComponent from '../components/TenisComponent.vue'
+</script>
+
 <template>
-<h1>esto es tenis</h1>
+  <main>
+    <TenisComponent />
+  </main>
 </template>
