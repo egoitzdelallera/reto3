@@ -1,11 +1,46 @@
 <template>
     <div class="container">
-      <div class="row d-flex flex-nowrap align-items-center">
-        <div class="col-md-6 titulo">
+      <div class="row ancho">
+        <div class="col-md-6 col-12 titulo">
           <h1 class="px-4">ACTIVIDADES DE</h1>
           <h1>BALONCESTO</h1>
         </div>
-        <div class="col-md-6 right-side-scrollable">
+  
+        <!-- Filters (Absolutely Positioned) -->
+        <div class="filters">
+          <div class="filtro rounded d-flex justify-content-around">
+            <select id="actividades">
+              <option value="actividades" select hidden>Categorias</option>
+              <option value="deporte">Deporte</option>
+              <option value="recreacion">Recreación</option>
+              <option value="comida">Comida</option>
+              <option value="otros">Otros</option>
+            </select>
+            <select id="edad">
+              <option value="edad" select hidden>Edad</option>
+              <option value="deporte">centro1</option>
+              <option value="recreacion">centro2</option>
+              <option value="comida">centro3</option>
+              <option value="otros">otro4</option>
+            </select>
+            <select id="idioma">
+              <option value="idioma" select hidden>Idioma</option>
+              <option value="deporte">centro1</option>
+              <option value="recreacion">centro2</option>
+              <option value="comida">centro3</option>
+              <option value="otros">otro4</option>
+            </select>
+            <select id="horario">
+              <option value="horario" select hidden>Horario</option>
+              <option value="deporte">centro1</option>
+              <option value="recreacion">centro2</option>
+              <option value="comida">centro3</option>
+              <option value="otros">otros4</option>
+            </select>
+          </div>
+        </div>
+  
+        <div class="col-md-6 mt-4 col-12 right-side-scrollable">
           <div class="right-side">
             <!-- Beginner Basketball -->
             <div class="activity-block">
@@ -20,7 +55,7 @@
                 </div>
               </div>
               <div class="row mt-3 d-flex justify-content-center align-items-center">
-                <div class="col-md-4 ">
+                <div class="col-md-4">
                   <p>Martes: 18:00 - 19:30</p>
                   <p>Jueves: 18:00 - 19:30</p>
                 </div>
@@ -47,7 +82,7 @@
                 </div>
               </div>
               <div class="row mt-3 d-flex justify-content-center align-items-center">
-                <div class="col-md-4 ">
+                <div class="col-md-4">
                   <p>Lunes: 17:00 - 18:30</p>
                   <p>Miércoles: 17:00 - 18:30</p>
                 </div>
@@ -74,8 +109,35 @@
                 </div>
               </div>
               <div class="row mt-3 d-flex justify-content-center align-items-center">
-                <div class="col-md-4 ">
-                  <p>Viernes: 16:00 - 17:30</p>
+                <div class="col-md-4">
+                  <p>Lunes: 17:00 - 18:30</p>
+                  <p>Miércoles: 17:00 - 18:30</p>
+                </div>
+                <div class="col-md-4">
+                  <p class="center">Centro Cívico</p>
+                  <p class="center bold">Otro Centro</p>
+                </div>
+                <div class="col-md-4">
+                  <button class="cssbuttons-io">
+                    <span>¡Inscríbete!</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="activity-block">
+              <div class="row">
+                <div class="col-12">
+                  <h2>Baloncesto Otro Nivel</h2>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <p>Descripción de la actividad.</p>
+                </div>
+              </div>
+              <div class="row mt-3 d-flex justify-content-center align-items-center">
+                <div class="col-md-4">
+                  <p>Lunes: 17:00 - 18:30</p>
+                  <p>Miércoles: 17:00 - 18:30</p>
                 </div>
                 <div class="col-md-4">
                   <p class="center">Centro Cívico</p>
@@ -98,32 +160,9 @@
                 </div>
               </div>
               <div class="row mt-3 d-flex justify-content-center align-items-center">
-                <div class="col-md-4 ">
-                  <p>Viernes: 16:00 - 17:30</p>
-                </div>
                 <div class="col-md-4">
-                  <p class="center">Centro Cívico</p>
-                  <p class="center bold">Otro Centro</p>
-                </div>
-                <div class="col-md-4">
-                  <button>¡Inscríbete!</button>
-                </div>
-              </div>
-            </div>
-            <div class="activity-block">
-              <div class="row">
-                <div class="col-12">
-                  <h2>Baloncesto Otro Nivel</h2>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-12">
-                  <p>Descripción de la actividad.</p>
-                </div>
-              </div>
-              <div class="row mt-3 d-flex justify-content-center align-items-center">
-                <div class="col-md-4 ">
-                  <p>Viernes: 16:00 - 17:30</p>
+                  <p>Lunes: 17:00 - 18:30</p>
+                  <p>Miércoles: 17:00 - 18:30</p>
                 </div>
                 <div class="col-md-4">
                   <p class="center">Centro Cívico</p>
@@ -146,8 +185,9 @@
                 </div>
               </div>
               <div class="row mt-3 d-flex justify-content-center align-items-center">
-                <div class="col-md-4 ">
-                  <p>Sábado: 10:00 - 11:30</p>
+                <div class="col-md-4">
+                  <p>Lunes: 17:00 - 18:30</p>
+                  <p>Miércoles: 17:00 - 18:30</p>
                 </div>
                 <div class="col-md-4">
                   <p class="center">Centro Cívico</p>
@@ -159,6 +199,7 @@
               </div>
             </div>
           </div>
+          <div class="scroll-fade"></div>
         </div>
       </div>
     </div>
@@ -179,6 +220,13 @@
     background-size: 67%;
   }
   
+.ancho{
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+
   .titulo {
     margin-top: 1.9em;
     margin-left: 1.1em;
@@ -194,31 +242,13 @@
     line-height: 0.9;
   }
   
-  .additional-blocks-top,
-  .additional-blocks-bottom {
-    margin-top: 20px;
-    /* Add space above/below the blocks */
-    width: 100%;
-  }
-  
-  .additional-block-left {
-    background-color: black;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    text-align: center;
-    width: 90%;
-  }
-  
   /* Right side: Scrollable Activity Blocks */
   .right-side-scrollable {
     overflow-y: auto;
-    /* Enable vertical scroll */
+    position: relative; /* Required for absolute positioning of fade */
     height: 100vh;
-    /* Fill the viewport height */
     padding: 20px 0;
-    /* Add padding to the top and bottom */
-    margin-right: 5%;
+    margin-top: 5% 5% 0% 0%;
   }
   
   /* Scrollbar Styling */
@@ -261,6 +291,7 @@
     border-radius: 25px;
     position: relative;
     overflow: hidden;
+  
   }
   
   .activity-block.faded {
@@ -281,11 +312,11 @@
     font-family: Inter;
     font-weight: 300;
     letter-spacing: -0.03em;
-
+  
   }
   
   .activity-block .center {
-    
+  
     font-size: .85em;
     margin-top: -1.9em;
   }
@@ -299,32 +330,131 @@
     padding-top: 0em;
     margin-bottom: -1em;
     letter-spacing: 0.00em;
-
+  
   }
   
   .activity-block button {
-    background-color: white;
-    color: black;
+    
     border: none;
-    padding: 1px 24px 0px 20px;
+    padding: 3px 24px 0px 20px;
     cursor: pointer;
-    border-radius: 15px;
-    margin-right: -5em;
+    border-radius: 55px;
+    margin-bottom: -.2em;
+    margin-left: .5em;
     font-weight: 700;
     font-style: italic;
     font-size: 2.5em;
     font-family: Thunder;
-    
   }
+
+  .cssbuttons-io {
+  position: relative;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: 0.05em;
+  border-radius: 0.8em;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(to right, #8e2de2, #4a00e0);
+  background-color: white;
+  color: black;
+  overflow: hidden;
+}
+
+.cssbuttons-io span {
+  position: relative;
+  z-index: 10;
+  transition: color 0.4s;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.8em 1.2em 0.8em 1.05em;
+}
+
+.cssbuttons-io::before,
+.cssbuttons-io::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.cssbuttons-io::before {
+  content: "";
+  background: #000;
+  width: 120%;
+  left: -10%;
+  transform: skew(30deg);
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.cssbuttons-io:hover::before {
+  transform: translate3d(100%, 0, 0);
+}
+
+.cssbuttons-io:active {
+  transform: scale(0.95);
+}
   
+
+
+
+
+
   .activity-block .schedule {
     position: absolute;
     bottom: 20px;
     left: 20px;
   }
   
-  /* Red bars in the background (left side) */
+  /* Scroll Fade Effect */
+  .scroll-fade {
+      z-index: 998;
+      position: sticky;
+      bottom: -21px; /* Adjusted to move the fade a bit lower */
+      left: 0;
+      width: 100%;
+      height: 450px; /* Increased the height of the fade */
+      background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #c1272d); /* Gradient from transparent to #c1272d */
+      pointer-events: none; /* Ensure the fade doesn't interfere with scrolling */
+  }
   
+  /* Filters (Absolutely Positioned) */
+  .filters {
+    position: absolute;
+    top: 100px; /* Adjust as needed to position below the title */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000; /* Ensure filters are above other content */
+    width: 100%; /* Ancho completo */
+    padding: 0 15px; /* Espacio a los lados */
+    box-sizing: border-box; /* Asegura que padding no aumente el ancho */
+  }
+  
+.filtro {
+    background-color: black;
+    color: white;
+    margin: 0 auto; /* Centra horizontalmente */
+    max-width: 500px; /* Ancho máximo del filtro */
+}
+
+.filtro select {
+    background-color: transparent !important;
+    color: white;
+    border: 0px;
+    padding: 10px;
+    font-size: 1.5em;
+    font-family: Thunder; /* Asegura que la tipografía se aplique a las opciones */
+    font-weight: 500;
+    font-style: italic;}
+
+.filtro option {
+    background-color: #000000;
+    color: white;
+    
+}
   
   /* Responsive design (Optional) */
   @media (max-width: 768px) {
@@ -332,20 +462,32 @@
       flex-direction: column;
     }
   
-    .left-side {
-      position: static;
-      height: auto;
-      width: 100%;
+    .row {
+      flex-direction: column;
     }
   
+    .titulo,
     .right-side-scrollable {
-      height: auto;
+      width: 100%;
+      box-sizing: border-box; /* Asegura que padding y border se incluyan en el ancho total */
     }
+  
+    .col-md-4 {
+      width: 100%;
+      /* Ancho completo en pantallas pequeñas */
+      box-sizing: border-box;
+    }
+  .filters {
+          position: relative; /* Vuelve a la posición normal en pantallas pequeñas */
+          top: auto;
+          left: auto;
+          transform: none;
+          padding: 10px;
+      }
+  
+      .filtro {
+          max-width: 100%;
+          margin: 0;
+      }
   }
-  
-  
-  
-  
-  /*esto es el scroll*/
-  
   </style>
