@@ -37,6 +37,32 @@
     font-style: normal;
   }
 
+  /*Thunder*/
+  @font-face {
+    font-family: 'Thunder';
+    src: url('../fuentes/Thunder-BoldLC.ttf') format('truetype');
+    font-weight: 500;
+    font-style:normal;
+  }
+  @font-face {
+    font-family: 'Thunder';
+    src: url('../fuentes/Thunder-ExtraBoldLCItalic.ttf') format('truetype');
+    font-weight: 800;
+    font-style:italic;
+  }
+  @font-face {
+    font-family: 'Thunder';
+    src: url('../fuentes/Thunder-SemiBoldLC.ttf') format('truetype');
+    font-weight: 700;
+    font-style:normal;
+  }
+  @font-face {
+    font-family: 'Thunder';
+    src: url('../fuentes/Thunder-SemiBoldLCItalic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+  }
+
 
 body {
     overflow-x: hidden; /* Prevent horizontal scroll */

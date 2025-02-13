@@ -1,3 +1,9 @@
+<script setup>
+import BasketComponente from '../components/BasketComponent.vue'
+</script>
+
 <template>
-    <h1>esto es basket</h1>
+    
+        <BasketComponente />
+    
 </template>
