@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/FooterView.vue'
+import IniciarSesionComponent from '@/components/IniciarSesionComponent.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,11 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/NavView.vue'),
     },
+    {
+      path: '/login',
+      name: 'login',
+      component: IniciarSesionComponent,
+    }
   ],
 })
 
