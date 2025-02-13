@@ -12,6 +12,7 @@ class Actividad extends Model
 
     protected $fillable = [
         'nombre',
+        'descripcion',
         'id_centro_civico',
         'id_tipo_actividad',
         'id_monitor',
