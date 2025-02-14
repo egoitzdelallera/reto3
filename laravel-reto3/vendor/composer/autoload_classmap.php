@@ -7,7 +7,14 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'App\\Http\\Controllers\\ActividadController' => $baseDir . '/app/Http/Controllers/ActividadController.php',
+    'App\\Http\\Controllers\\ActividadesUsuarioController' => $baseDir . '/app/Http/Controllers/ActividadesUsuarioController.php',
+    'App\\Http\\Controllers\\CentroCivicoController' => $baseDir . '/app/Http/Controllers/CentroCivicoController.php',
+
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
+    'App\\Http\\Controllers\\HorarioController' => $baseDir . '/app/Http/Controllers/HorarioController.php',
+    'App\\Http\\Controllers\\MonitorController' => $baseDir . '/app/Http/Controllers/MonitorController.php',
+    'App\\Http\\Controllers\\TiposActividadController' => $baseDir . '/app/Http/Controllers/TiposActividadController.php',
+    'App\\Http\\Controllers\\UserController' => $baseDir . '/app/Http/Controllers/UserController.php',
     'App\\Models\\Actividad' => $baseDir . '/app/Models/Actividad.php',
     'App\\Models\\ActividadesUsuario' => $baseDir . '/app/Models/ActividadesUsuario.php',
     'App\\Models\\CentroCivico' => $baseDir . '/app/Models/CentroCivico.php',

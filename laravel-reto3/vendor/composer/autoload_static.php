@@ -542,7 +542,13 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
 
     public static $classMap = array (
         'App\\Http\\Controllers\\ActividadController' => __DIR__ . '/../..' . '/app/Http/Controllers/ActividadController.php',
+        'App\\Http\\Controllers\\ActividadesUsuarioController' => __DIR__ . '/../..' . '/app/Http/Controllers/ActividadesUsuarioController.php',
+        'App\\Http\\Controllers\\CentroCivicoController' => __DIR__ . '/../..' . '/app/Http/Controllers/CentroCivicoController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\HorarioController' => __DIR__ . '/../..' . '/app/Http/Controllers/HorarioController.php',
+        'App\\Http\\Controllers\\MonitorController' => __DIR__ . '/../..' . '/app/Http/Controllers/MonitorController.php',
+        'App\\Http\\Controllers\\TiposActividadController' => __DIR__ . '/../..' . '/app/Http/Controllers/TiposActividadController.php',
+        'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
         'App\\Models\\Actividad' => __DIR__ . '/../..' . '/app/Models/Actividad.php',
         'App\\Models\\ActividadesUsuario' => __DIR__ . '/../..' . '/app/Models/ActividadesUsuario.php',
         'App\\Models\\CentroCivico' => __DIR__ . '/../..' . '/app/Models/CentroCivico.php',

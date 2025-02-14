@@ -11,6 +11,7 @@ class Monitor extends Model
     protected $fillable = 
     [
         'nombre',
+        'apellido',
         'foto',
     ];
 
