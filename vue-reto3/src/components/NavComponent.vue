@@ -51,20 +51,27 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    
+    transition:ease-in-out 0.2s;
     text-decoration: none;
+
+  }
+  
+  .cat_borde:hover{
+    padding: 4px 8px 4px 8px;
+    border: .1px solid black;
+    position:absolute;
   }
   .cat_borde{
-    border: 1px solid white;
-    padding: 2px 1px 2px 1px;
-    border-radius: 8px;
+    border: 2px solid white;
+    padding: 2px 2px 2px 2px;
+    border-radius: 10px;
+    transition: ease-in-out 0.2s;
+
   }
   .categorias a{
     color: rgb(0, 0, 0);
     background-color: aliceblue;
     padding: 3px 15px 3px 15px;
     border-radius: 6px;
-    
-    
   }
 </style>

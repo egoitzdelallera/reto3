@@ -4,6 +4,7 @@ import InicioComponent from '../components/InicioComponent.vue'
 
 <template>
   <main>
-    <InicioComponent />
+      <InicioComponent />
+
   </main>
 </template>
