@@ -11,7 +11,7 @@ export default function useActividades() {
 
   const setCategory = (id) => {
     console.log("Setting category ID to:", id)
-    categoryId.value = parseInt(id, 10)
+    categoryId.value = Number.parseInt(id, 10)
   }
 
   const fetchActividades = async () => {
@@ -30,6 +30,7 @@ export default function useActividades() {
     } catch (err) {
       console.error("Error al obtener actividades:", err)
       error.value = err.response?.data?.message || err.message || "Error al obtener actividades"
+      actividades.value = [] // Asegúrate de limpiar las actividades en caso de error
     } finally {
       loading.value = false
     }
@@ -44,3 +45,4 @@ export default function useActividades() {
     fetchActividades,
   }
 }
+

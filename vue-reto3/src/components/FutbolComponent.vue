@@ -37,6 +37,7 @@
         <div class="right-side">
           <div v-if="loading">Cargando actividades...</div>
           <div v-else-if="error">Error al cargar actividades: {{ error }}</div>
+          <div v-else-if="actividades.length === 0">No hay actividades disponibles para esta categoría.</div>
           <div v-else>
             <div v-for="actividad in actividades" :key="actividad.id" class="activity-block">
               <div class="row">
@@ -50,14 +51,23 @@
                 </div>
               </div>
               <div class="row mt-3 d-flex justify-content-center align-items-center">
-                <!-- Placeholder for schedule and center information. Replace with your actual data -->
                 <div class="col-md-4">
-                  <p>Horario Placeholder</p>
-                  <p>Otro Horario</p>
+                  <p>Tipo Actividad: {{ actividad.tipo_actividad ? actividad.tipo_actividad.nombre : 'N/A' }}</p>
+                  <p>Edad Minima: {{ actividad.tipo_actividad ? actividad.tipo_actividad.edad_min : 'N/A' }}</p>
+                  <p>
+                    Horarios:
+                    <span v-if="actividad.horarios && actividad.horarios.length > 0">
+                      <span v-for="horario in actividad.horarios" :key="horario.id">
+                        {{ formatDateTime(horario.fecha, horario.hora_inicio, horario.hora_fin) }}
+                        <br>
+                      </span>
+                    </span>
+                    <span v-else>No Horarios</span>
+                  </p>
                 </div>
                 <div class="col-md-4">
-                  <p class="center">Centro Civico</p>
-                  <p class="center bold">Ubicacion</p>
+                  <p class="center">Centro Civico: {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
+                  <p class="center bold">Monitor: {{ actividad.monitor ? actividad.monitor.nombre : 'N/A' }} {{ actividad.monitor ? actividad.monitor.apellido : 'N/A' }}</p>
                 </div>
                 <div class="col-md-4">
                   <button>¡Inscríbete!</button>
@@ -73,20 +83,18 @@
 </template>
 
 <script>
-import { computed, watch, onMounted, ref } from 'vue';
+import { computed, watch, onMounted } from 'vue';
 import useActividades from '../composables/useActividades';
 import useCategorias from '../composables/useCategorias';
-import { useRoute } from 'vue-router';
 
 export default {
   setup() {
-    const route = useRoute();
     const { actividades, loading, error, categoryId, setCategory, fetchActividades } = useActividades();
     const { categorias, fetchCategorias } = useCategorias();
 
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
-      return categoria ? categoria.nombre.toUpperCase() : 'ACTIVIDAD';
+      return categoria ? categoria.nombre.toUpperCase() : 'FÚTBOL';
     });
 
     watch(categoryId, (newCategoryId) => {
@@ -97,35 +105,40 @@ export default {
 
     onMounted(async () => {
       await fetchCategorias();
-      // Determine initial category based on the route
-      let initialCategoryId = null;
-      switch (route.path) {
-        case '/boxeo':
-          initialCategoryId = 3; // Replace with the actual category ID for boxeo
-          break;
-        case '/tenis':
-          initialCategoryId = 2; // Replace with the actual category ID for tenis
-          break;
-        case '/baloncesto':
-          initialCategoryId = 1; // Replace with the actual category ID for baloncesto
-          break;
-        // Add more cases as needed
-        default:
-          console.warn('Unknown route:', route.path);
-      }
-
-      if (initialCategoryId) {
-        setCategory(initialCategoryId);
+      const futbolCategoria = categorias.value.find(cat => cat.nombre.toLowerCase() === 'fútbol' || cat.nombre.toLowerCase() === 'futbol' || cat.nombre.toLowerCase() === 'football');
+      if (futbolCategoria) {
+        console.log('Categoría de fútbol encontrada:', futbolCategoria);
+        setCategory(futbolCategoria.id);
         await fetchActividades();
+      } else {
+        console.error('No se encontró la categoría de fútbol');
       }
     });
+
+    // Helper function to get the day of the week
+    const getDayOfWeek = (dateString) => {
+      const date = new Date(dateString);
+      const daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      return daysOfWeek[date.getDay()];
+    };
+
+    // Helper function to format date, day of week, and time
+    const formatDateTime = (dateString, startTime, endTime) => {
+      const date = new Date(dateString);
+      const dayOfWeek = getDayOfWeek(dateString);
+      const formattedDate = date.toLocaleDateString('es-ES');
+      const formattedStartTime = new Date(`1970-01-01T${startTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      const formattedEndTime = new Date(`1970-01-01T${endTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+      return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
+    };
 
     return {
       actividades,
       loading,
       error,
       categoriaNombre,
-      categorias: computed(() => categorias.value),
+      formatDateTime
     };
   }
 };

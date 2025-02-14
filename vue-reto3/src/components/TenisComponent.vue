@@ -17,13 +17,23 @@
               <h2 class="activity-title">{{ actividad.nombre }}</h2>
               <p class="activity-description">{{ actividad.descripcion }}</p>
               <div class="datos">
-                <div class="location">
-                  Centro Cívico<br>
-                  Ibaiondo
+                <div class="left-datos">
+                  <div>Centro Cívico: {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</div>
+                  <div>Monitor: {{ actividad.monitor ? actividad.monitor.nombre : 'N/A' }} {{ actividad.monitor ?
+                      actividad.monitor.apellido : 'N/A' }}</div>
                 </div>
-                <div class="schedule">
-                  Martes: 18:00 - 19:30<br>
-                  Jueves: 18:00 - 19:30
+
+                <div class="right-datos">
+                  <div>Edad Minima: {{ actividad.tipo_actividad ? actividad.tipo_actividad.edad_min : 'N/A' }}</div>
+                  <div>
+                    Horarios:
+                    <span v-if="actividad.horarios && actividad.horarios.length > 0">
+                      <span v-for="horario in actividad.horarios" :key="horario.id">
+                        {{ formatDateTime(horario.fecha, horario.hora_inicio, horario.hora_fin) }}<br>
+                      </span>
+                    </span>
+                    <span v-else>No Horarios</span>
+                  </div>
                 </div>
               </div>
               <div class="enroll">INSCRÍBETE!</div>
@@ -187,16 +197,23 @@
   margin-bottom: 20px;
 }
 
-.location {
-  font-size: 1.2em;
-  margin-bottom: 12px;
-  white-space: pre-line;
+.left-datos {
+  width: 50%;
+  text-align: left;
 }
 
-.schedule {
-  font-size: 1.2em;
-  margin-bottom: 20px;
-  white-space: pre-line;
+.right-datos {
+  width: 50%;
+  text-align: right;
+}
+
+.datos {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  width: 100%;
+  border-top: 2px solid white;
+  padding-top: 5%;
 }
 
 .enroll {
@@ -214,15 +231,6 @@
   background-color: #f0f0f0;
   color: #33691e;
 }
-
-.datos {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-  width: 100%;
-  border-top: 2px solid white;
-  padding-top: 5%;
-}
 </style>
 
 <script>
@@ -237,7 +245,7 @@ export default {
 
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
-      return categoria ? categoria.nombre.toUpperCase() : 'ACTIVIDAD';
+      return categoria ? categoria.nombre.toUpperCase() : 'TENIS';
     });
 
     watch(categoryId, (newCategoryId) => {
@@ -248,20 +256,40 @@ export default {
 
     onMounted(async () => {
       await fetchCategorias();
-      // Aquí deberías obtener el ID de la categoría de alguna manera, por ejemplo:
-      // const categoryIdFromRoute = route.params.id;
-      // setCategory(categoryIdFromRoute);
-      // Por ahora, vamos a usar un ID de ejemplo:
-      setCategory(1);
-      fetchActividades();
+      const tenisCategoria = categorias.value.find(cat => cat.nombre.toLowerCase() === 'tenis');
+      if (tenisCategoria) {
+        setCategory(tenisCategoria.id);
+        await fetchActividades();
+      } else {
+        console.error('No se encontró la categoría de tenis');
+      }
     });
+
+        // Helper function to get the day of the week
+        const getDayOfWeek = (dateString) => {
+        const date = new Date(dateString);
+        const daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        return daysOfWeek[date.getDay()];
+        };
+
+        // Helper function to format date, day of week, and time
+        const formatDateTime = (dateString, startTime, endTime) => {
+        const date = new Date(dateString);
+        const dayOfWeek = getDayOfWeek(dateString);
+        const formattedDate = date.toLocaleDateString('es-ES');
+        const formattedStartTime = new Date(`1970-01-01T${startTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        const formattedEndTime = new Date(`1970-01-01T${endTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+        return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
+        };
 
     return {
       actividades,
       loading,
       error,
-      categoriaNombre
+      categoriaNombre,
+      formatDateTime
     };
   }
 };
-</script>
+</script> 

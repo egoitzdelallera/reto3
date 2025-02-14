@@ -59,15 +59,19 @@ class ActividadController extends Controller
      */
     public function show(string $id)
     {
-        $actividades = Actividad::where('id_tipo_actividad', $id)->get();
-
+        $actividades = Actividad::where('id_tipo_actividad', $id)
+            ->with(['centroCivico', 'monitor', 'tipoActividad', 'horarios']) // Eager load relationships
+            ->get();
+    
+        // Add this line for debugging:
+        // dd($actividades->toArray());
+    
         if ($actividades->isEmpty()) {
             return response()->json(['message' => 'No se encontraron actividades para el tipo de actividad especificado'], 404);
         }
-
+    
         return response()->json($actividades);
     }
-
     /**
      * Show the form for editing the specified resource.
      */

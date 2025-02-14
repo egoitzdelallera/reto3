@@ -6,7 +6,7 @@
         <h1>{{ categoriaNombre }}</h1>
       </div>
 
-      <!-- Filters (Absolutely Positioned) -->
+      <!-- Filters -->
       <div class="filters">
         <div class="filtro rounded d-flex justify-content-around">
           <select id="actividades" v-model="selectedCategory" @change="onCategoryChange">
@@ -34,7 +34,7 @@
             <option value="deporte">centro1</option>
             <option value="recreacion">centro2</option>
             <option value="comida">centro3</option>
-            <option value="otros">otros4</option>
+            <option value="otros">otro4</option>
           </select>
         </div>
       </div>
@@ -58,12 +58,22 @@
               <div class="row mt-3 d-flex justify-content-center align-items-center">
                 <!-- Placeholder for schedule and center information. Replace with your actual data -->
                 <div class="col-md-4">
-                  <p>Horario Placeholder</p>
-                  <p>Otro Horario</p>
+                  <p>Tipo Actividad: {{ actividad.tipo_actividad ? actividad.tipo_actividad.nombre : 'N/A' }}</p>
+                  <p>Edad Minima: {{ actividad.tipo_actividad ? actividad.tipo_actividad.edad_min : 'N/A' }}</p>
+                  <p>
+                    Horarios:
+                    <span v-if="actividad.horarios && actividad.horarios.length > 0">
+                      <span v-for="horario in actividad.horarios" :key="horario.id">
+                        {{ formatDateTime(horario.fecha, horario.hora_inicio, horario.hora_fin) }}
+                        <br>
+                      </span>
+                    </span>
+                    <span v-else>No Horarios</span>
+                  </p>
                 </div>
                 <div class="col-md-4">
-                  <p class="center">Centro Civico</p>
-                  <p class="center bold">Ubicacion</p>
+                  <p class="center">Centro Civico: {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
+                  <p class="center bold">Monitor: {{ actividad.monitor ? actividad.monitor.nombre : 'N/A' }} {{ actividad.monitor ? actividad.monitor.apellido : 'N/A' }}</p>
                 </div>
                 <div class="col-md-4">
                   <button>¡Inscríbete!</button>
@@ -112,6 +122,24 @@ export default {
       await fetchActividades();
     });
 
+    // Helper function to get the day of the week
+    const getDayOfWeek = (dateString) => {
+      const date = new Date(dateString);
+      const daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      return daysOfWeek[date.getDay()];
+    };
+
+    // Helper function to format date, day of week, and time
+    const formatDateTime = (dateString, startTime, endTime) => {
+      const date = new Date(dateString);
+      const dayOfWeek = getDayOfWeek(dateString);
+      const formattedDate = date.toLocaleDateString('es-ES');
+      const formattedStartTime = new Date(`1970-01-01T${startTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      const formattedEndTime = new Date(`1970-01-01T${endTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+      return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
+    };
+
     return {
       actividades,
       loading,
@@ -119,13 +147,15 @@ export default {
       categoriaNombre,
       categorias: computed(() => categorias.value), // Expose categorias
       selectedCategory,
-      onCategoryChange
+      onCategoryChange,
+      formatDateTime,
     };
   }
 };
 </script>
 
 <style scoped>
+/* Styles - No change needed unless you want to adapt the new content */
 /* Base styles */
 .container {
   display: flex;

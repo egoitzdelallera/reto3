@@ -46,6 +46,49 @@
     </div>
   </div>
 </template>
+
+<script>
+import { useRouter } from 'vue-router';
+import useCategorias from '../composables/useCategorias';
+import useSlider from '../composables/useSlider';
+import { ref, computed } from 'vue';
+
+export default {
+  setup() {
+    const router = useRouter();
+    const { categorias, loading, error, fetchCategorias } = useCategorias();
+    const { init: initSlideFunction } = useSlider();
+    const selectedCategoria = ref('');
+
+    const init = async () => {
+      await fetchCategorias();
+      initSlideFunction();
+    };
+
+    const onCategoriaChange = () => {
+      if (selectedCategoria.value) {
+        const categoria = categorias.value.find(cat => cat.id === parseInt(selectedCategoria.value));
+        if (categoria) {
+          router.push({ name: categoria.nombre.toLowerCase(), params: { id: categoria.id } });
+        }
+      }
+    };
+
+    return {
+      categorias,
+      loading,
+      error,
+      selectedCategoria,
+      onCategoriaChange,
+      init
+    };
+  },
+  mounted() {
+    this.init();
+  }
+};
+</script>
+
 <style>
 .titulo {
   text-align: center;
@@ -106,11 +149,13 @@ option {
   border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .slide.active {
   transform: scale(1);
   opacity: 1;
+  cursor: pointer;
 }
 
 .slide img {
@@ -160,7 +205,7 @@ option {
   color: white;
   font-size: 20px;
   opacity: 0;
-  transition: transform 0.1s ease;
+  transition: opacity 0.3s ease, transform 0.1s ease;
   backdrop-filter: blur(4px);
   z-index: 1000;
 }
@@ -186,41 +231,3 @@ option {
   content: "";
 }
 </style>
-<script>
-import { useRouter } from 'vue-router';
-import useCategorias from '../composables/useCategorias';
-import useSlider from '../composables/useSlider';
-import { ref } from 'vue';
-
-export default {
-  setup() {
-    const router = useRouter();
-    const { categorias, loading, error, fetchCategorias } = useCategorias();
-    const { init: initSlideFunction } = useSlider();
-    const selectedCategoria = ref('');
-
-    const init = async () => {
-      await fetchCategorias();
-      initSlideFunction();
-    };
-
-    const onCategoriaChange = () => {
-      if (selectedCategoria.value) {
-        router.push({ name: 'actividades', params: { id: selectedCategoria.value } });
-      }
-    };
-
-    return {
-      categorias,
-      loading,
-      error,
-      selectedCategoria,
-      onCategoriaChange,
-      init
-    };
-  },
-  mounted() {
-    this.init();
-  }
-};
-</script>
