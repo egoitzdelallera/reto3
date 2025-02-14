@@ -64,8 +64,9 @@
                   <p class="center bold">Ibaiondo</p>
                 </div>
                 <div class="col-md-4">
-                  <button>¡Inscríbete!</button>
-                </div>
+                  <button class="cssbuttons-io">
+                    <span>¡Inscríbete!</span></button>
+                  </div>
               </div>
             </div>
   
@@ -91,8 +92,9 @@
                   <p class="center bold">Hegoalde</p>
                 </div>
                 <div class="col-md-4">
-                  <button>¡Inscríbete!</button>
-                </div>
+                  <button class="cssbuttons-io">
+                    <span>¡Inscríbete!</span></button>
+                  </div>
               </div>
             </div>
   
@@ -144,8 +146,9 @@
                   <p class="center bold">Otro Centro</p>
                 </div>
                 <div class="col-md-4">
-                  <button>¡Inscríbete!</button>
-                </div>
+                  <button class="cssbuttons-io">
+                    <span>¡Inscríbete!</span></button>
+                  </div>
               </div>
             </div>
             <div class="activity-block">
@@ -169,8 +172,9 @@
                   <p class="center bold">Otro Centro</p>
                 </div>
                 <div class="col-md-4">
-                  <button>¡Inscríbete!</button>
-                </div>
+                  <button class="cssbuttons-io">
+                    <span>¡Inscríbete!</span></button>
+                  </div>
               </div>
             </div>
             <div class="activity-block">
@@ -194,8 +198,9 @@
                   <p class="center bold">Ibaiondo 2</p>
                 </div>
                 <div class="col-md-4">
-                  <button>¡Inscríbete!</button>
-                </div>
+                  <button class="cssbuttons-io">
+                    <span>¡Inscríbete!</span></button>
+                  </div>
               </div>
             </div>
           </div>
@@ -312,15 +317,13 @@
     font-family: Inter;
     font-weight: 300;
     letter-spacing: -0.03em;
-  
   }
-  
+
   .activity-block .center {
-  
     font-size: .85em;
     margin-top: -1.9em;
   }
-  
+
   .activity-block .bold {
     font-weight: 700;
     font-style: normal;
@@ -330,74 +333,57 @@
     padding-top: 0em;
     margin-bottom: -1em;
     letter-spacing: 0.00em;
-  
   }
   
-  .activity-block button {
-    
-    border: none;
-    padding: 3px 24px 0px 20px;
-    cursor: pointer;
+  /* Estilos para el botón con la clase cssbuttons-io */
+  .cssbuttons-io {
     border-radius: 55px;
     margin-bottom: -.2em;
     margin-left: .5em;
+    border: none;
+    background: linear-gradient(to right, #c1272d, #ff0015); /* Degradado */
+    color: rgb(255, 255, 255); /* Letras negras por defecto */
+    overflow: hidden;
+    transition: all 0.4s; /* Transición para todas las propiedades */
+    position: relative;
+    z-index: 10;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .cssbuttons-io span {
     font-weight: 700;
     font-style: italic;
     font-size: 2.5em;
     font-family: Thunder;
+    padding: 3px 24px 0px 20px;
+    cursor: pointer;
   }
 
-  .cssbuttons-io {
-  position: relative;
-  font-family: inherit;
-  font-weight: 500;
-  font-size: 18px;
-  letter-spacing: 0.05em;
-  border-radius: 0.8em;
-  cursor: pointer;
-  border: none;
-  background: linear-gradient(to right, #8e2de2, #4a00e0);
-  background-color: white;
-  color: black;
-  overflow: hidden;
-}
+  .cssbuttons-io::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white; /* Fondo blanco por defecto */
+    z-index: -1; /* Poner el degradado detrás del texto */
+    transform: translateX(-100%); /* Ocultar el degradado inicialmente */
+    transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1); /* Transición para la animación */
+  }
 
-.cssbuttons-io span {
-  position: relative;
-  z-index: 10;
-  transition: color 0.4s;
-  display: inline-flex;
-  align-items: center;
-  padding: 0.8em 1.2em 0.8em 1.05em;
-}
+  .cssbuttons-io:hover {
+    color: black; /* Letras negras al hacer hover */
+  }
 
-.cssbuttons-io::before,
-.cssbuttons-io::after {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-}
+  .cssbuttons-io:hover::before {
+    transform: translateX(0); /* Mostrar el degradado al hacer hover */
+  }
 
-.cssbuttons-io::before {
-  content: "";
-  background: #000;
-  width: 120%;
-  left: -10%;
-  transform: skew(30deg);
-  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
-}
-
-.cssbuttons-io:hover::before {
-  transform: translate3d(100%, 0, 0);
-}
-
-.cssbuttons-io:active {
-  transform: scale(0.95);
-}
-  
+  .cssbuttons-io span:active {
+    transform: scale(0.95);
+  }
 
 
 

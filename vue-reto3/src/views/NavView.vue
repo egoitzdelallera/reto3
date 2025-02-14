@@ -3,7 +3,7 @@ import NavComponent from '../components/NavComponent.vue'
 </script>
 
 <template>
-  <main>
+  <main class="w-100">
     <NavComponent />
   </main>
 </template>

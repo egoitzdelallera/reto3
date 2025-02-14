@@ -14,7 +14,16 @@ export default function useCategorias() {
     error.value = null;
     try {
       const response = await axios.get(`${API_URL}/categorias`);
-      categorias.value = response.data;
+      console.log('API Response:', response); // Log the entire response
+      console.log('API Data:', response.data); // Log the data specifically
+
+      if (Array.isArray(response.data)) {
+        categorias.value = response.data;
+      } else {
+        console.warn('API did not return an array. Adjusting.');
+        categorias.value = Array.isArray(response.data.data) ? response.data.data : [];  // Try response.data.data
+      }
+      console.log('Categorias after fetch:', categorias.value); // Log categories after fetch
     } catch (err) {
       error.value = err.response?.data?.message || err.message || 'Failed to fetch categories';
       console.error('Error fetching categories:', err);
