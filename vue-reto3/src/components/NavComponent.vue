@@ -16,7 +16,7 @@
       <div class="nav-links" :class="{ 'active': isMenuOpen }">
         <div class="categorias">
           <div class="cat_borde">
-            <a href="http://localhost:5173/">Categorías</a>  <!-- Enlace modificado -->
+            <a href="http://localhost:5173/">Inicio</a>
           </div>
         </div>
         <div class="categorias">
