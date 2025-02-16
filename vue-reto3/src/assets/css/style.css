@@ -63,6 +63,25 @@
   font-style: italic;
 }
 
+/*akira*/
+@font-face {
+  font-family: 'Akira';
+  src: url('../fuentes/AKIRA.otf') format('opentype');
+  font-weight: 700;
+}
+/*danger*/
+@font-face {
+  font-family: 'Danger';
+  src: url('../fuentes/danger.otf') format('opentype');
+  font-weight: 700;
+}
+/*heaven*/
+@font-face {
+  font-family: 'Heaven';
+  src: url('../fuentes/heaven.otf') format('opentype');
+  font-weight: 700;
+}
+
 
 body {
   overflow-x: hidden; /* Prevent horizontal scroll */

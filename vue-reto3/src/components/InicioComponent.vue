@@ -1,12 +1,12 @@
 <template>
   <div class="container-fluid bg-black">
     <div class="row justify-content-center">
-      <div class="col-5">
-        <div class="titulo w-100">eXplora y apúNtate <br> en actividadEs</div>
+      <div class="col-10 col-sm-5">
+        <div class="titulo w-100">eXplora y apúNtate en actividadEs</div>
       </div>
     </div>
     <div class="row justify-content-center mt-3">
-      <div class="col-4">
+      <div class="col-10 col-md-6">
         <div class="filtro border border-white rounded d-flex justify-content-around">
           <select id="actividades" v-model="selectedCategoria" @change="onCategoriaChange" :disabled="loading">
             <option value="" disabled selected hidden>Categorias</option>
@@ -31,7 +31,7 @@
             <option value="deporte">centro1</option>
             <option value="recreacion">centro2</option>
             <option value="comida">centro3</option>
-            <option value="otros">otros4</option>
+            <option value="otros">otro4</option>
           </select>
         </div>
       </div>
@@ -48,14 +48,15 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import useCategorias from '../composables/useCategorias';
 import useSlider from '../composables/useSlider';
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 
 export default {
   setup() {
     const router = useRouter();
+    const route = useRoute(); // Use the route object
     const { categorias, loading, error, fetchCategorias } = useCategorias();
     const { init: initSlideFunction } = useSlider();
     const selectedCategoria = ref('');
@@ -63,6 +64,26 @@ export default {
     const init = async () => {
       await fetchCategorias();
       initSlideFunction();
+      // Call loadActivities based on route when component is first loaded
+      loadActivities();
+    };
+
+    const loadActivities = async () => {
+      // Get the route name from the URL (e.g., 'basket', 'boxeo')
+      const routeName = route.name;
+      if (routeName) {
+        const categoria = categorias.value.find(cat => cat.nombre.toLowerCase() === routeName);
+
+        if (categoria) {
+            selectedCategoria.value = categoria.id;
+            // Fetch activities based on the category, *replace with your actual data fetching logic*
+            console.log(`Fetching activities for category: ${categoria.nombre}`);
+            // await fetchActivities(categoria.id); // Example: Assuming a fetchActivities function in your composable
+        } else {
+            selectedCategoria.value = null;
+            console.log("route not found, resetting selectedCategory");
+        }
+      }
     };
 
     const onCategoriaChange = () => {
@@ -73,6 +94,15 @@ export default {
         }
       }
     };
+
+    // Watch for route changes
+    watch(
+      () => route.name,
+      (newRouteName) => {
+        console.log(`Route changed to: ${newRouteName}`);
+        loadActivities(); // Load activities when the route changes
+      }
+    );
 
     return {
       categorias,
@@ -230,4 +260,60 @@ option {
 .no-cursor .custom-cursor.right::before {
   content: "";
 }
+@media (max-width: 768px) {
+  .titulo {
+    font-size: 2.5em;
+  }
+
+  .filtro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .filtro select {
+    width: 90%;
+    margin-bottom: 0.5em;
+  }
+
+  .slider-container {
+    width: 100%;
+    overflow: visible; /* Permite que los slides se desborden verticalmente */
+  }
+
+  .slider {
+    display: flex;
+    flex-direction: column; /* Apila los slides verticalmente */
+    align-items: center; /* Centra los slides horizontalmente */
+    position: static; /* Elimina el posicionamiento absoluto/relativo para que se apilen */
+    transform: none !important; /* Elimina cualquier transformación translateX */
+  }
+
+  .slide {
+    min-width: 90%; /* Ocupa casi todo el ancho */
+    height: auto; /* Altura automática para adaptarse al contenido */
+    margin: 1em 1em; /* Margen vertical entre los slides */
+    transform: none; /* Elimina la escala */
+    opacity: 1; /* Asegura que todos los slides sean visibles */
+  }
+
+  /* Restringe a un máximo de 4 slides */
+  .slider > *:nth-child(n+5) {
+    display: none;
+  }
+
+  .slide.active {
+    transform: none; /* Elimina la escala del slide activo */
+  }
+
+  .slide img {
+    width: 100%; /* La imagen ocupa todo el ancho del slide */
+    height: auto; /* Altura automática */
+  }
+
+  .custom-cursor {
+    display: none; /* Oculta el cursor personalizado */
+  }
+}
+
 </style>

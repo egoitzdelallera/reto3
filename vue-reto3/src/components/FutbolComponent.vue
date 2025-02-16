@@ -150,10 +150,14 @@ export default {
   display: flex;
   font-family: sans-serif;
   color: white;
-  background-color: #c1272d;
+  background-color: black; /* Fallback color */
   padding: 0;
   min-height: 100vh;
-  max-width: 100vw;
+  max-width: 100%;
+  background-image: url(../assets/img/fondoCompletoFutbol.png);
+  background-repeat: no-repeat;
+  background-size: cover; /* Ajusta la imagen para cubrir el contenedor */
+  background-position: center; /* Centra la imagen */
 }
 
 .titulo {

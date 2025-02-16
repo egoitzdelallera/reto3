@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('descripcion');
+            $table->string('idioma');
+            $table->bigInteger('edad_min');
+            $table->bigInteger('edad_max');
             $table->unsignedBigInteger('id_tipo_actividad');
             $table->unsignedBigInteger('id_centro_civico');
             $table->unsignedBigInteger('id_monitor');
