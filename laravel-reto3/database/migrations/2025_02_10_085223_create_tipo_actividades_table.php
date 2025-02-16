@@ -15,9 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('descripcion');
-            $table->string('idioma');
-            $table->bigInteger('edad_min');
-            $table->bigInteger('edad_max');
             $table->string('multimedia');
         });
     }

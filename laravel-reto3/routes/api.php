@@ -19,7 +19,6 @@ Route::controller(TiposActividadController::class)->group(function() {
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/actividades', [ActividadController::class, 'index']); // Todas las actividades de baloncesto
-
     Route::post('/actividades/crear', [ActividadController::class, 'store']);
     Route::put('/actividades/{id}', [ActividadController::class, 'update']);
     Route::delete('/actividades/{id}', [ActividadController::class, 'destroy']);

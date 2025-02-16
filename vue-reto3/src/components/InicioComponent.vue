@@ -31,7 +31,7 @@
             <option value="deporte">centro1</option>
             <option value="recreacion">centro2</option>
             <option value="comida">centro3</option>
-            <option value="otros">otros4</option>
+            <option value="otros">otro4</option>
           </select>
         </div>
       </div>
@@ -48,14 +48,15 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import useCategorias from '../composables/useCategorias';
 import useSlider from '../composables/useSlider';
-import { ref, computed } from 'vue';
+import { ref, watch } from 'vue';
 
 export default {
   setup() {
     const router = useRouter();
+    const route = useRoute(); // Use the route object
     const { categorias, loading, error, fetchCategorias } = useCategorias();
     const { init: initSlideFunction } = useSlider();
     const selectedCategoria = ref('');
@@ -63,6 +64,26 @@ export default {
     const init = async () => {
       await fetchCategorias();
       initSlideFunction();
+      // Call loadActivities based on route when component is first loaded
+      loadActivities();
+    };
+
+    const loadActivities = async () => {
+      // Get the route name from the URL (e.g., 'basket', 'boxeo')
+      const routeName = route.name;
+      if (routeName) {
+        const categoria = categorias.value.find(cat => cat.nombre.toLowerCase() === routeName);
+
+        if (categoria) {
+            selectedCategoria.value = categoria.id;
+            // Fetch activities based on the category, *replace with your actual data fetching logic*
+            console.log(`Fetching activities for category: ${categoria.nombre}`);
+            // await fetchActivities(categoria.id); // Example: Assuming a fetchActivities function in your composable
+        } else {
+            selectedCategoria.value = null;
+            console.log("route not found, resetting selectedCategory");
+        }
+      }
     };
 
     const onCategoriaChange = () => {
@@ -73,6 +94,15 @@ export default {
         }
       }
     };
+
+    // Watch for route changes
+    watch(
+      () => route.name,
+      (newRouteName) => {
+        console.log(`Route changed to: ${newRouteName}`);
+        loadActivities(); // Load activities when the route changes
+      }
+    );
 
     return {
       categorias,

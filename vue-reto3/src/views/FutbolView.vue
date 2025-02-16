@@ -1,1 +1,10 @@
-<template><h1> esto es el futbol</h1></template>
+<script setup>
+import FutbolComponent from '../components/FutbolComponent.vue'
+</script>
+
+<template>
+  <main>
+      <FutbolComponent />
+
+  </main>
+</template>

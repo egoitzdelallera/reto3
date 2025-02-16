@@ -1,35 +1,40 @@
-// composables/useActividades.js
-import { ref, readonly } from 'vue';
-import axios from 'axios';
+import { ref, readonly } from "vue"
+import axios from "axios"
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = "http://localhost:8000/api"
+const categoryId = ref(null)
 
 export default function useActividades() {
-  const actividades = ref([]);
-  const loading = ref(false);
-  const error = ref(null);
-  const categoryId = ref(null); // Mantén categoryId aquí
+  const actividades = ref([])
+  const loading = ref(false)
+  const error = ref(null)
 
   const setCategory = (id) => {
-    categoryId.value = id;
-  };
+    console.log("Setting category ID to:", id)
+    categoryId.value = Number.parseInt(id, 10)
+  }
 
   const fetchActividades = async () => {
-    loading.value = true;
-    error.value = null;
-    try {
-      let url = `${API_URL}/actividades`; // Endpoint base
-      if (categoryId.value) {
-        url = `${API_URL}/actividad/${categoryId.value}`; // Endpoint con categoryId
-      }
-      const response = await axios.get(url);
-      actividades.value = response.data;
-    } catch (err) {
-      error.value = err.response?.data?.message || err.message || "Error al obtener actividades";
-    } finally {
-      loading.value = false;
+    if (!categoryId.value) {
+      console.log("No se ha establecido una categoría")
+      return
     }
-  };
+
+    console.log("Obteniendo actividades para la categoría:", categoryId.value)
+    loading.value = true
+    error.value = null
+    try {
+      const response = await axios.get(`${API_URL}/actividad/${categoryId.value}`)
+      console.log("Actividades obtenidas:", response.data)
+      actividades.value = response.data
+    } catch (err) {
+      console.error("Error al obtener actividades:", err)
+      error.value = err.response?.data?.message || err.message || "Error al obtener actividades"
+      actividades.value = [] // Asegúrate de limpiar las actividades en caso de error
+    } finally {
+      loading.value = false
+    }
+  }
 
   return {
     actividades: readonly(actividades),
@@ -38,5 +43,5 @@ export default function useActividades() {
     categoryId: readonly(categoryId),
     setCategory,
     fetchActividades,
-  };
+  }
 }

@@ -19,7 +19,8 @@ const useSlider = () => {
         { src: futbolImage, name: 'Futbol', link: '/futbol' },
         { src: tenisImage, name: 'Tenis', link: '/tenis' },
       ];
-      this.currentIndex = 0;
+      // Ajusta el currentIndex inicial
+      this.currentIndex = this.images.length * 1.5; // Inicializa para mostrar elementos a los lados
       this.isAnimating = false;
     }
 
