@@ -38,7 +38,7 @@ class UserController extends Controller
             'nombre' => $user->nombre,
             'correo' => $user->correo,
             'tipo' => $user->tipo,
-            'telefono' => $user->telefono,
+            'telefono' => $user->telefono
         ];
 
         // Generar el token con los claims personalizados
