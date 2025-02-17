@@ -8,33 +8,36 @@
       <!-- Filters -->
       <div class="col-md-4 filters">
         <div class="filtro rounded d-flex flex-column flex-md-row justify-content-around">
-          <select id="centroCivico" v-model="selectedCentroCivico" @change="applyFilters"
-            :class="{ 'font-weight-bold': selectedCentroCivico }">
+          <select
+            id="centroCivico"
+            v-model="selectedCentroCivico"
+            @change="handleCentroCivicoChange"
+            :class="{ 'font-weight-bold': selectedCentroCivico }"
+          >
             <option value="" disabled selected hidden>Centro Cívico</option>
             <option value="all">Todos los centros</option>
             <option v-for="centro in centrosCivicos" :key="centro.id" :value="centro.id">
               {{ centro.nombre }}
             </option>
+            <option value="ubicacion">Filtrar por ubicación</option>
           </select>
           <select id="edad" v-model="selectedEdad" @change="applyFilters" :class="{ 'font-weight-bold': selectedEdad }">
             <option value="" disabled selected hidden>Edad</option>
-            <option value="">Todas</option>
-            <option value="6">+ 6 años</option>
-            <option value="8">+ 8 años</option>
-            <option value="10">+ 10 años</option>
-            <option value="16">+ 16 años</option>
+            <option value="all">Todas</option>
+            <option value="6">6+ años</option>
+            <option value="8">8+ años</option>
+            <option value="10">10+ años</option>
+            <option value="16">16+ años</option>
           </select>
-          <select id="idioma" v-model="selectedIdioma" @change="applyFilters"
-            :class="{ 'font-weight-bold': selectedIdioma }">
+          <select id="idioma" v-model="selectedIdioma" @change="applyFilters" :class="{ 'font-weight-bold': selectedIdioma }">
             <option value="" disabled selected hidden>Idioma</option>
-            <option value="">Todos</option>
+            <option value="all">Todas</option>
             <option value="Español">Español</option>
             <option value="Euskera">Euskera</option>
           </select>
-          <select id="horario" v-model="selectedHorario" @change="applyFilters"
-            :class="{ 'font-weight-bold': selectedHorario }">
+          <select id="horario" v-model="selectedHorario" @change="applyFilters" :class="{ 'font-weight-bold': selectedHorario }">
             <option value="" disabled selected hidden>Horario</option>
-            <option value="">Todos</option>
+            <option value="all">Todas</option>
             <option value="manana">Mañana</option>
             <option value="tarde">Tarde</option>
             <option value="noche">Noche</option>
@@ -47,10 +50,10 @@
           <div v-if="loading">Cargando actividades...</div>
           <div v-else-if="error">Error al cargar actividades: {{ error }}</div>
           <div v-else>
-            <div v-if="filteredActividades.length === 0">
+            <div v-if="filteredAndSortedActividades.length === 0">
               <p>No hay actividades disponibles con estos criterios.</p>
             </div>
-            <div v-else v-for="actividad in filteredActividades" :key="actividad.id" class="activity-block">
+            <div v-else v-for="actividad in filteredAndSortedActividades" :key="actividad.id" class="activity-block">
               <div class="row">
                 <div class="col-12">
                   <h2>{{ actividad.nombre }}</h2>
@@ -79,16 +82,14 @@
                     </span>
                     <span v-else>No Horarios</span>
                   </p>
-
                 </div>
                 <div class="col-3 col-md-3 px-0">
-
                   <p class="center" style="font-size: 1em;">Centro Cívico:</p>
                   <p class="center bold"> {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
                 </div>
                 <div class="col-4 col-md-4 d-flex justify-content-center align-items-center">
                   <button class="cssbuttons-io">
-                    <span>Inscribete</span>
+                    <span>¡Inscríbete!</span>
                   </button>
                 </div>
               </div>
@@ -134,6 +135,9 @@ export default {
       { id: 5, nombre: 'Salburua' }
     ]);
 
+    const userLatitude = ref(null);
+    const userLongitude = ref(null);
+
     const filteredActividades = computed(() => {
       let filtered = [...actividades.value];
 
@@ -141,6 +145,8 @@ export default {
       if (selectedCentroCivico.value) {
         if (selectedCentroCivico.value === 'all') {
           // Do nothing, show all centers
+        } else if (selectedCentroCivico.value === 'ubicacion') {
+          // Handled by getLocation and sorting
         } else {
           filtered = filtered.filter(actividad => {
             return actividad.centro_civico && actividad.centro_civico.id === parseInt(selectedCentroCivico.value);
@@ -149,15 +155,16 @@ export default {
       }
 
       // Apply Edad filter
-      if (selectedEdad.value) {
+      if (selectedEdad.value && selectedEdad.value !== 'all') {
+        const selectedAge = parseInt(selectedEdad.value, 10);
         filtered = filtered.filter(actividad => {
-          return actividad.edad_min !== null && actividad.edad_min >= parseInt(selectedEdad.value);
+          return actividad.edad_min !== null && actividad.edad_min <= selectedAge;
         });
       }
 
       // Apply Idioma filter
-      if (selectedIdioma.value) {
-        if (selectedIdioma.value !== '') { // Check if a specific language is selected
+      if (selectedIdioma.value  && selectedIdioma.value !== 'all') {
+        if (selectedIdioma.value !== 'all') { // Check if a specific language is selected
           filtered = filtered.filter(actividad => {
             return actividad.idioma === selectedIdioma.value;
           });
@@ -165,8 +172,8 @@ export default {
       }
 
       // Apply Horario filter
-      if (selectedHorario.value) {
-        if (selectedHorario.value !== '') {
+      if (selectedHorario.value  && selectedHorario.value !== 'all') {
+        if (selectedHorario.value !== 'all') {
           filtered = filtered.filter(actividad => {
             if (!actividad.horarios || actividad.horarios.length === 0) {
               return false;
@@ -188,14 +195,69 @@ export default {
           });
         }
       }
+      return filtered;
+    });
 
+     const filteredAndSortedActividades = computed(() => {
+      let filtered = [...filteredActividades.value];
+      if (selectedCentroCivico.value === 'ubicacion' && userLatitude.value && userLongitude.value) {
+        // Sort by distance
+        filtered.sort((a, b) => {
+          const distanceA = calculateDistance(
+            userLatitude.value,
+            userLongitude.value,
+            a.centro_civico.latitud,
+            a.centro_civico.longitud
+          );
+          const distanceB = calculateDistance(
+            userLatitude.value,
+            userLongitude.value,
+            b.centro_civico.latitud,
+            b.centro_civico.longitud
+          );
+          return distanceA - distanceB;
+        });
+      }
       return filtered;
     });
 
     const applyFilters = () => {
-      // No need to do anything here.  The `filteredActividades` computed property
+      // No need to do anything here. The `filteredActividades` computed property
       // will automatically recalculate when the filter refs change.
     };
+
+     const handleCentroCivicoChange = () => {
+      if (selectedCentroCivico.value === 'ubicacion') {
+        getLocation()
+      } else {
+        applyFilters()
+      }
+    }
+
+    const getLocation = () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            userLatitude.value = position.coords.latitude
+            userLongitude.value = position.coords.longitude
+
+            // Guardar en localStorage
+            localStorage.setItem('userLatitude', userLatitude.value)
+            localStorage.setItem('userLongitude', userLongitude.value)
+
+            console.log(`Ubicación obtenida: Latitud ${userLatitude.value}, Longitud ${userLongitude.value}`)
+          },
+          (error) => {
+            console.error("Error obteniendo ubicación:", error)
+            alert("No se pudo obtener la ubicación")
+            selectedCentroCivico.value = '' // Resetear la selección
+          }
+        )
+      } else {
+        alert("Tu navegador no soporta geolocalización")
+        selectedCentroCivico.value = '' // Resetear la selección
+      }
+    }
 
     const changeCategory = async () => {
       setCategory(selectedCategoryId.value);
@@ -206,7 +268,7 @@ export default {
       await fetchCategorias();
 
       // Find the boxeo category
-      const boxeoCategory = categorias.value.find(category => category.nombre.toLowerCase() === 'boxeo');
+       const boxeoCategory = categorias.value.find(category => category.id === 3);
 
       if (boxeoCategory) {
         selectedCategoryId.value = boxeoCategory.id;  // Set initial selection to basket category
@@ -220,6 +282,14 @@ export default {
           setCategory(categorias.value[0].id);
           await fetchActividades();
         }
+      }
+ //Try to get the location from localStorage on component mount
+      const storedLat = localStorage.getItem('userLatitude');
+      const storedLng = localStorage.getItem('userLongitude');
+
+      if (storedLat && storedLng) {
+        userLatitude.value = parseFloat(storedLat);
+        userLongitude.value = parseFloat(storedLng);
       }
     });
 
@@ -241,6 +311,25 @@ export default {
       return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
     };
 
+    // Helper function to calculate distance between two coordinates (Haversine formula)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Radius of the earth in km
+      const dLat = deg2rad(lat2 - lat1);
+      const dLon = deg2rad(lon2 - lon1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        ;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c; // Distance in km
+      return distance;
+    }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI / 180)
+    }
+
     return {
       actividades,
       loading,
@@ -253,10 +342,15 @@ export default {
       selectedIdioma,
       selectedHorario,
       filteredActividades,
+      filteredAndSortedActividades,
       applyFilters,
+      handleCentroCivicoChange,
       categories: computed(() => categorias.value),
       selectedCategoryId,
-      changeCategory
+      changeCategory,
+      getLocation,
+      userLatitude,
+      userLongitude
     };
   }
 };
@@ -446,7 +540,7 @@ hr {
   z-index: -1;
   /* Poner el degradado detrás del texto */
   transform: translateX(-100%);
-  /* Ocultar el degradado inicialmente */
+  /* Ocultar el degradado initially */
   transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
   /* Transición para la animación */
 }

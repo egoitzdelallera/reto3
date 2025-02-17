@@ -5,37 +5,7 @@
         <div class="titulo w-100">eXplora y apúNtate en actividadEs</div>
       </div>
     </div>
-    <div class="row justify-content-center mt-3">
-      <div class="col-10 col-md-6">
-        <div class="filtro border border-white rounded d-flex justify-content-around">
-          <select id="actividades" v-model="selectedCategoria" @change="onCategoriaChange" :disabled="loading">
-            <option value="" disabled selected hidden>Categorias</option>
-            <option v-for="categoria in categorias" :key="categoria.id" :value="categoria.id">{{ categoria.nombre }}</option>
-          </select>
-          <select id="edad">
-            <option value="edad" select hidden>Edad</option>
-            <option value="deporte">centro1</option>
-            <option value="recreacion">centro2</option>
-            <option value="comida">centro3</option>
-            <option value="otros">otro4</option>
-          </select>
-          <select id="idioma">
-            <option value="idioma" select hidden>Idioma</option>
-            <option value="deporte">centro1</option>
-            <option value="recreacion">centro2</option>
-            <option value="comida">centro3</option>
-            <option value="otros">otro4</option>
-          </select>
-          <select id="horario">
-            <option value="horario" select hidden>Horario</option>
-            <option value="deporte">centro1</option>
-            <option value="recreacion">centro2</option>
-            <option value="comida">centro3</option>
-            <option value="otros">otro4</option>
-          </select>
-        </div>
-      </div>
-    </div>
+    
     <div class="actividades">
       <div class="custom-cursor"></div>
       <div class="slider-container">
