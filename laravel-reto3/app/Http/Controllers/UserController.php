@@ -51,10 +51,10 @@ class UserController extends Controller
     public function inscribir(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'dni' => 'required|string|max:9',
             'nombre' => 'required|string|max:255',
             'apellido1' => 'required|string|max:255',
             'apellido2' => 'required|string|max:255',
-            'dni' => 'nullable|string|max:20',
             'sexo' => 'required|in:hombre,mujer',
             'edad' => 'required|integer|min:0',
             'telefono' => 'required|string|max:20',

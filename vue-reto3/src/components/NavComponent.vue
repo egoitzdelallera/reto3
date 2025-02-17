@@ -19,9 +19,23 @@
             <a href="http://localhost:5173/">Inicio</a>
           </div>
         </div>
-        <div class="categorias">
+        <div class="categorias" v-if="!isAuthenticated">
           <div class="cat_borde">
-            <a href="#" class="btn_login">Iniciar sesión</a>
+            <button @click="goToLogin">Iniciar Sesión</button>
+          </div>
+        </div>
+        <!-- Mostrar solo si el usuario está autenticado y su tipo es 'admin' -->
+        <div class="categorias" v-else-if="userType === 'admin'">
+          <div class="cat_borde">
+            <button @click="goToIntranet">Acceder Intranet</button>
+            <button @click="logout">Cerrar sesión</button>
+          </div>
+        </div>
+
+        <!-- Mostrar solo si el usuario está autenticado y su tipo es 'ciudadano' -->
+        <div class="categorias" v-else-if="userType === 'ciudadano'">
+          <div class="cat_borde">
+            <button @click="logout">Cerrar sesión</button>
           </div>
         </div>
       </div>
@@ -31,16 +45,40 @@
 
 <script>
 export default {
+  computed: {
+    isAuthenticated() {
+      return localStorage.getItem('jwt_token') !== null;
+    }
+  },
   data() {
     return {
       isMenuOpen: false, // Estado del menú (abierto/cerrado)
+      userType: this.getUserType()
     };
   },
   methods: {
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen; // Cambia el estado del menú
     },
-  },
+    goToLogin() {
+      this.$router.push('/login'); // Asegúrate de tener definida la ruta '/login' en tu Vue Router
+    },
+    goToIntranet() {
+      this.$router.push('/intranet');
+    },
+    logout() {
+      localStorage.removeItem('jwt_token'); // Eliminar token
+      localStorage.removeItem('user_data'); // Opcional: Eliminar datos del usuario
+      this.$router.push('/'); // Redirigir a la página principal
+    },
+    getUserType() {
+      const user_data = JSON.parse(localStorage.getItem('user_data'));
+      if (user_data && user_data.tipo) {
+        return user_data.tipo;  // Retorna 'admin' o 'ciudadano' dependiendo de los datos
+      }
+      return null;  // Si no hay usuario o no tiene tipo, retornamos null
+    }
+  }
 };
 </script>
 
@@ -111,7 +149,6 @@ nav {
 .cat_borde:hover {
   padding: 8px 8px 8px 8px;
   border: 0.1px solid black;
-  /*position: absolute;  Evitar absolute aquí */
 }
 
 .cat_borde {
@@ -122,6 +159,14 @@ nav {
 }
 
 .categorias a {
+  color: rgb(0, 0, 0);
+  background-color: aliceblue;
+  padding: 3px 15px 3px 15px;
+  border-radius: 6px;
+  text-decoration: none; /* Quitar subrayado */
+}
+
+.categorias button {
   color: rgb(0, 0, 0);
   background-color: aliceblue;
   padding: 3px 15px 3px 15px;
@@ -159,9 +204,9 @@ nav {
 
   .hamburger-button {
     display: flex; /* Muestra el botón hamburguesa */
-    position: absolute; /*Posicion absoluta*/
-    top: 10px;        /*Ajustar posicion */
-    right: 10px;       /*Ajustar posicion */
+    position: absolute; /* Posición absoluta */
+    top: 10px; /* Ajustar posición */
+    right: 10px; /* Ajustar posición */
   }
 }
 </style>

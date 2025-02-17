@@ -4,6 +4,8 @@ import BasketView from '../views/BasketView.vue'
 import BoxeoView from '../views/BoxeoView.vue'
 import FutbolView from '../views/FutbolView.vue'
 import TenisView from '../views/TenisView.vue'
+import IniciarSesionComponent from '@/components/IniciarSesionComponent.vue'
+import IntranetComponent from '@/components/IntranetComponent.vue'
 
 const routes = [
   {
@@ -39,6 +41,16 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () => import('../views/NavView.vue'),
   },
+  {
+    path: '/login',
+    name: 'login',
+    component: IniciarSesionComponent,
+  },
+  {
+    path: '/intranet',
+    name: 'intranet',
+    component: IntranetComponent,
+  }
 ]
 
 const router = createRouter({

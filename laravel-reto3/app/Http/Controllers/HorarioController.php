@@ -27,20 +27,29 @@ class HorarioController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, $actividadId)
     {
         $validator = Validator::make($request->all(), [
             'fecha' => 'required|date',
             'hora_inicio' => 'required|date_format:H:i',
             'hora_fin' => 'required|date_format:H:i',
-            'id_actividad' => 'required|exists:actividades,id',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        
+        // Crear el horario
+        $horario = new Horario();
+        $horario->dia = $request->input('dia');
+        $horario->hora_inicio = $request->input('hora_inicio');
+        $horario->hora_fin = $request->input('hora_fin');
+        $horario->actividad = $actividadId;  // Relacionamos el horario con la actividad creada
+
+        $horario->save();
+
+        return response()->json(['message' => 'Horario creado correctamente', 'data' => $horario], 201);
+
     }
 
     /**
