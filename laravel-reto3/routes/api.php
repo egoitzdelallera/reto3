@@ -25,3 +25,7 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::get('/actividad/{id}', [ActividadController::class, 'show']);
+
+Route::controller(UserController::class)->group(function() {
+    Route::post('inscribir', 'inscribir');
+});

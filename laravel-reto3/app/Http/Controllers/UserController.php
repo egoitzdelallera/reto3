@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Validator;
 use App\Models\User;
-use Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Hash;
+use App\Jobs\SendInscriptionEmail;
+use Validator;
+use Illuminate\Support\Facades\Auth;
+
 
 
 class UserController extends Controller
@@ -45,50 +48,55 @@ class UserController extends Controller
         return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
     }
 
-    public function register(Request $request)
+    public function inscribir(Request $request)
     {
-        // Validación de los datos de entrada
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:255',
-            'correo' => 'required|string|email|max:255|unique:users,correo',
-            'tipo' => 'required|string|max:50',
-            'telefono' => 'nullable|string|max:15',
-            'password' => 'required|string|min:6|confirmed'
+            'apellido1' => 'required|string|max:255',
+            'apellido2' => 'required|string|max:255',
+            'dni' => 'nullable|string|max:20',
+            'sexo' => 'required|in:hombre,mujer',
+            'edad' => 'required|integer|min:0',
+            'telefono' => 'required|string|max:20',
+            'correo' => 'required|string|email|max:255',
+            'id_actividad' => 'required|exists:actividades,id',
         ]);
 
-        // Retornar errores si la validación falla
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['message' => 'Error de validación', 'errors' => $validator->errors()], 422);
         }
+        $nombre_completo = $request->input('nombre') . ' ' . $request->input('apellido1') . ' ' . $request->input('apellido2');
 
-        // Crear el usuario
         $user = new User();
-        $user->nombre = $request->input('nombre');
-        $user->correo = $request->input('correo');
-        $user->tipo = $request->input('tipo');
+        $user->nombre = $nombre_completo;
+        $user->dni = $request->input('dni');
+        $user->sexo = $request->input('sexo');
+        $user->edad = $request->input('edad');
         $user->telefono = $request->input('telefono');
-        $user->password = Hash::make($request->input('password'));
+        $user->correo = $request->input('correo');
+        $user->password = Hash::make(uniqid()); // Contraseña aleatoria
         $user->save();
 
-        // Reclamos personalizados para el token
-        $customClaims = [
-            'id' => $user->id,
+        // Preparar los datos para el correo electrónico
+        $inscriptionData = [
             'nombre' => $user->nombre,
-            'correo' => $user->correo,
-            'tipo' => $user->tipo,
+            'apellido1' => $user->apellido1,
+            'apellido2' => $user->apellido2,
+            'dni' => $user->dni,
+            'sexo' => $user->sexo,
+            'edad' => $user->edad,
             'telefono' => $user->telefono,
+            'correo' => $user->correo,
+            'actividad_nombre' => $request->input('id_actividad'), //TODO: get actividad_nombre from id
         ];
 
-        // Generar el token
-        $token = JWTAuth::fromUser($user);
+        // Enviar el correo electrónico usando el Job
+        SendInscriptionEmail::dispatch($inscriptionData, $user->correo);
 
-        return response()->json([
-            'message' => 'Usuario registrado correctamente',
-            'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer'
-        ], 201);
+
+        return response()->json(['message' => 'Inscripción realizada correctamente', 'user' => $user], 201);
     }
+
 
     public function logout(Request $request)
     {

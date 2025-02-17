@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->string('ubicacion');
-            $table->bigInteger('longitud');
-            $table->bigInteger('latitud');
+            $table->float('longitud');
+            $table->float('latitud');
             $table->string('url');
             $table->string('telefono');
             $table->string('correo');
