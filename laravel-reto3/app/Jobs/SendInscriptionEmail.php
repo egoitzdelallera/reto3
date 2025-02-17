@@ -3,13 +3,12 @@
 namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail; // Import the Mail facade
-use App\Mail\InscriptionConfirmation;  // Import the Mailable
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InscriptionConfirmation;
 use Illuminate\Support\Facades\Log;
 
 class SendInscriptionEmail implements ShouldQueue
@@ -40,9 +39,12 @@ class SendInscriptionEmail implements ShouldQueue
     public function handle()
     {
         try {
-             Mail::to($this->userEmail)->send(new InscriptionConfirmation($this->inscriptionData));
+            Mail::to($this->userEmail)->send(new InscriptionConfirmation(
+                $this->inscriptionData['nombre'],
+                $this->inscriptionData['actividad_nombre']
+            ));
         } catch (\Exception $e) {
-             Log::error('Error sending inscription confirmation email: ' . $e->getMessage());
+            Log::error('Error sending inscription confirmation email: ' . $e->getMessage());
         }
     }
 }

@@ -10,10 +10,12 @@ use Illuminate\Queue\SerializesModels;
 class TestEmail extends Mailable implements ShouldQueue // ShouldQueue or not, your choice for testing
 {
     use Queueable, SerializesModels;
+    public $subject = 'Mensaje del Ayuntamiento';
+    public $contenido;
 
     public function __construct()
     {
-        //
+        $this->contenido=$contenido;
     }
 
     public function build()

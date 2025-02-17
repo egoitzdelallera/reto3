@@ -7,20 +7,24 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class InscriptionConfirmation extends Mailable implements ShouldQueue // Implement ShouldQueue
+
+
+class InscriptionConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $inscriptionData;
+    public $nombre;
+    public $actividadNombre;
 
     /**
      * Create a new message instance.
      *
-     * @param array $inscriptionData
+     * @return void
      */
-    public function __construct(array $inscriptionData)
+    public function __construct(string $nombre, string $actividadNombre)
     {
-        $this->inscriptionData = $inscriptionData;
+        $this->nombre = $nombre;
+        $this->actividadNombre = $actividadNombre;
     }
 
     /**
@@ -30,8 +34,7 @@ class InscriptionConfirmation extends Mailable implements ShouldQueue // Impleme
      */
     public function build()
     {
-        return $this->subject('Confirmación de Inscripción')
-                    ->view('emails.inscription_confirmation') // Path to your email view
-                    ->with('inscriptionData', $this->inscriptionData);  // Pass inscriptionData to the view
+        return $this->subject('Inscripción Confirmada')
+                    ->view('emails.inscripcion_confirmada'); // Asume que tienes una vista en resources/views/emails/inscripcion_confirmada.blade.php
     }
 }

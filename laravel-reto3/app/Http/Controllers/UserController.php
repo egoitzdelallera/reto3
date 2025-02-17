@@ -7,11 +7,15 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Jobs\SendInscriptionEmail;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\Actividad;  // Add this line to import the Actividad model
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
+use App\Mail\InscriptionConfirmation;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -22,6 +26,7 @@ class UserController extends Controller
 
     public function inscribir(Request $request)
     {
+        Log::info("Inicio del método inscribir");
 
         $validator = Validator::make($request->all(), [
             'dni' => 'required|string|max:9',
@@ -35,12 +40,21 @@ class UserController extends Controller
             'id_actividad' => 'required|exists:actividades,id',
         ]);
 
-          \Log::info("inscribir has passed validators");
+        Log::info("Validación de datos realizada.");
 
         if ($validator->fails()) {
+            Log::error("Error de validación: " . $validator->errors());
             return response()->json(['message' => 'Error de validación', 'errors' => $validator->errors()], 422);
         }
 
+        // Verificar si el DNI o correo ya existen en la base de datos
+        $existingUser = User::where('dni', $request->dni)->orWhere('correo', $request->correo)->first();
+
+        if ($existingUser) {
+             Log::warning("El DNI o correo ya existen en la base de datos.  DNI: " . $request->dni . ", Correo: " . $request->correo);
+            return response()->json(['message' => 'Ya existe un usuario registrado con este DNI o correo electrónico.'], 400);
+        }
+        // Creación del usuario
         $nombre_completo = $request->input('nombre') . ' ' . $request->input('apellido1') . ' ' . $request->input('apellido2');
 
         $user = new User();
@@ -52,13 +66,15 @@ class UserController extends Controller
         $user->correo = $request->input('correo');
         $user->password = Hash::make(uniqid()); // Contraseña aleatoria
         $user->save();
-        \Log::info("Inscribir has saved the user, ".$user["correo"]);
+        Log::info("Usuario guardado en la base de datos. ID: " . $user->id . ", Correo: " . $user->correo);
 
         // Guardar en la tabla actividades_usuarios
-        \DB::table('actividades_usuarios')->insert([
+        DB::table('actividades_usuarios')->insert([
             'id_actividad' => $request->input('id_actividad'),
             'id_usuario' => $user->id,
         ]);
+
+        Log::info("Registro en tabla actividades_usuarios completado.");
 
         // Retrieve the activity information
         $actividad = Actividad::find($request->input('id_actividad'));
@@ -75,12 +91,12 @@ class UserController extends Controller
             'correo' => $request->input('correo'),
             'actividad_nombre' => $actividad ? $actividad->nombre : 'Nombre de la Actividad', // Use activity name or default
         ];
-               \Log::info("Data array has been made");
-               \Log::info("email to pass  is".$inscriptionData['correo']);
+        Log::info("Datos del correo electrónico preparados. Correo: " . $inscriptionData['correo']);
 
         // Enviar el correo electrónico usando the job
         SendInscriptionEmail::dispatch($inscriptionData, $user->correo);
-        \Log::info("Passed dispatch call");
+        Log::info("Job SendInscriptionEmail despachado.");
+
         return response()->json(['message' => 'Inscripción realizada correctamente', 'user' => $user], 201);
     }
 
