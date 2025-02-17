@@ -1,127 +1,225 @@
 <template>
   <div class="container">
-    <main class="main-content">
-      <div class="main-left">
-        <h1 class="title">ACTIVIDADES</h1>
-        <h2 class="subtitle">{{ categoriaNombre }}</h2>
-        <div class="filters">
-          <div class="filtro rounded d-flex justify-content-around">
-            <select id="edad" v-model="edadFilter">
-              <option value="" disabled selected hidden>Edad</option>
-              <option value="centro1">centro1</option>
-              <option value="centro2">centro2</option>
-              <option value="centro3">centro3</option>
-              <option value="otro4">otro4</option>
-            </select>
-            <select id="idioma" v-model="idiomaFilter">
-              <option value="" disabled selected hidden>Idioma</option>
-              <option value="centro1">centro1</option>
-              <option value="centro2">centro2</option>
-              <option value="centro3">centro3</option>
-              <option value="otro4">otro4</option>
-            </select>
-            <select id="horario" v-model="horarioFilter">
-              <option value="" disabled selected hidden>Horario</option>
-              <option value="centro1">centro1</option>
-              <option value="centro2">centro2</option>
-              <option value="comida">centro3</option>
-              <option value="otros">otro4</option>
-            </select>
-          </div>
+    <div class="row d-flex align-items-center justify-content-around">
+      <div class="col-12 col-md-4 titulo">
+        <h1 class="ps-4">ACTIVIDADES</h1>
+        <h1 class="ps-4">DE <span class="categoria-nombre">{{ categoriaNombre }}</span></h1>
+      </div>
+      <!-- Filters -->
+      <div class="col-md-4 filters">
+        <div class="filtro rounded d-flex flex-column flex-md-row justify-content-around">
+          <select id="centroCivico" v-model="selectedCentroCivico" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedCentroCivico }">
+            <option value="" disabled selected hidden>Centro Cívico</option>
+            <option value="all">Todos los centros</option>
+            <option v-for="centro in centrosCivicos" :key="centro.id" :value="centro.id">
+              {{ centro.nombre }}
+            </option>
+          </select>
+          <select id="edad" v-model="selectedEdad" @change="applyFilters" :class="{ 'font-weight-bold': selectedEdad }">
+            <option value="" disabled selected hidden>Edad</option>
+            <option value="">Todas</option>
+            <option value="6">+ 6 años</option>
+            <option value="8">+ 8 años</option>
+            <option value="10">+ 10 años</option>
+            <option value="16">+ 16 años</option>
+          </select>
+          <select id="idioma" v-model="selectedIdioma" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedIdioma }">
+            <option value="" disabled selected hidden>Idioma</option>
+            <option value="">Todos</option>
+            <option value="Español">Español</option>
+            <option value="Euskera">Euskera</option>
+          </select>
+          <select id="horario" v-model="selectedHorario" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedHorario }">
+            <option value="" disabled selected hidden>Horario</option>
+            <option value="">Todos</option>
+            <option value="manana">Mañana</option>
+            <option value="tarde">Tarde</option>
+            <option value="noche">Noche</option>
+          </select>
         </div>
       </div>
-      <div class="right-side-container">
-        <div class="right-side-scrollable">
+
+      <div class="col-12 col-md-7 mt-4 right-side-scrollable">
+        <div class="right-side">
           <div v-if="loading">Cargando actividades...</div>
           <div v-else-if="error">Error al cargar actividades: {{ error }}</div>
           <div v-else>
-            <div v-for="actividad in actividadesFiltradas" :key="actividad.id" class="activity-card">
-              <h3 class="activity-title">{{ actividad.nombre }}</h3>
-              <p class="activity-description">{{ actividad.descripcion }}</p>
-
-              <div class="activity-details">
-                  <p>Centro Civico: {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
-                  <p>Monitor: {{ actividad.monitor ? actividad.monitor.nombre : 'N/A' }} {{ actividad.monitor ? actividad.monitor.apellido : 'N/A' }}</p>
-                  <p>Tipo Actividad: {{ actividad.tipo_actividad ? actividad.tipo_actividad.nombre : 'N/A' }}</p>
-                  <p>Edad Minima: {{ actividad.tipo_actividad ? actividad.tipo_actividad.edad_min : 'N/A' }}</p>
+            <div v-if="filteredActividades.length === 0">
+              <p>No hay actividades disponibles con estos criterios.</p>
+            </div>
+            <div v-else v-for="actividad in filteredActividades" :key="actividad.id" class="activity-block">
+              <div class="row">
+                <div class="col-12">
+                  <h2>{{ actividad.nombre }}</h2>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <p>{{ actividad.descripcion }}</p>
+                </div>
+              </div>
+              <div>
+                <hr class="mb-3">
+              </div>
+              <div class="row d-flex justify-content-center align-items-between">
+                <div class="col-5 col-md-5">
                   <p>
-                    Horarios:
+                    Monitor: {{ actividad.monitor ? actividad.monitor.nombre : 'N/A' }} {{ actividad.monitor ? actividad.monitor.apellido : 'N/A' }}
+                  </p>
+                  <p>Edad Mínima: {{ actividad.edad_min !== null ? actividad.edad_min : 'N/A' }}</p>
+                  <p class="w-75">
+                    Horario:
                     <span v-if="actividad.horarios && actividad.horarios.length > 0">
                       <span v-for="horario in actividad.horarios" :key="horario.id">
                         {{ formatDateTime(horario.fecha, horario.hora_inicio, horario.hora_fin) }}
-                        <br>
                       </span>
                     </span>
                     <span v-else>No Horarios</span>
                   </p>
-              </div>
 
-              <div class="activity-location">
-                Centro Cívico
-                <span class="location-name">IBAIONDO</span>
+                </div>
+                <div class="col-3 col-md-3 px-0">
+
+                  <p class="center" style="font-size: 1em;">Centro Cívico:</p>
+                  <p class="center bold"> {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
+                </div>
+                <div class="col-4 col-md-4 d-flex justify-content-center align-items-center">
+                  <button class="cssbuttons-io">
+                    <span>Inscribete</span>
+                  </button>
+                </div>
               </div>
-              <button class="register-button">INSCRÍBETE</button>
-            </div>
-            <div v-if="actividadesFiltradas.length === 0">
-              <p>No se encontraron actividades con los filtros seleccionados.</p>
             </div>
           </div>
         </div>
+        <div class="scroll-fade"></div>
       </div>
-    </main>
+    </div>
   </div>
 </template>
 
 <script>
-import { computed, watch, onMounted, ref } from 'vue';
-import useActividades from '../composables/useActividades'; // Ajusta la ruta si es necesario
-import useCategorias from '../composables/useCategorias';   // Ajusta la ruta si es necesario
-import { useRoute } from 'vue-router';
+import { computed, ref, onMounted, watch } from 'vue';
+import useActividades from '../composables/useActividades';
+import useCategorias from "../composables/useCategorias"
 
 export default {
-  name: "BoxingActivities",
   setup() {
-    const route = useRoute();
-    const { actividades, loading, error, categoryId, setCategory, fetchActividades } = useActividades();
-    const { categorias, fetchCategorias } = useCategorias();
-
-    const edadFilter = ref('');
-    const idiomaFilter = ref('');
-    const horarioFilter = ref('');
+    const { actividades, loading, error, fetchActividades, categoryId, setCategory } = useActividades();
+    const { categorias, fetchCategorias } = useCategorias()
 
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
-      return categoria ? categoria.nombre.toUpperCase() : 'ACTIVIDAD';
+      return categoria ? categoria.nombre.toUpperCase() : 'BOXEO';
     });
 
-    const actividadesFiltradas = computed(() => {
-      return actividades.value.filter(actividad => {
-        // Aquí debes ajustar la lógica de filtrado según tus necesidades
-        // Este es un ejemplo, debes adaptar los nombres de las propiedades a tu objeto 'actividad'
-        const edadCoincide = !edadFilter.value || actividad.edad === edadFilter.value;
-        const idiomaCoincide = !idiomaFilter.value || actividad.idioma === idiomaFilter.value;
-        const horarioCoincide = !horarioFilter.value || actividad.horario === horarioFilter.value;
+    // Local refs for filter selections
+    const selectedCentroCivico = ref('');
+    const selectedEdad = ref('');
+    const selectedIdioma = ref('');
+    const selectedHorario = ref('');
 
-        return edadCoincide && idiomaCoincide && horarioCoincide;
-      });
-    });
+    // Local ref for the selected category
+    const selectedCategoryId = ref(null);
 
+    // Fetch centros civicos (replace with your actual data fetching)
+    const centrosCivicos = ref([
+      { id: 1, nombre: 'Ibaiondo' },
+      { id: 2, nombre: 'Aldabe' },
+      { id: 3, nombre: 'El Pilar' },
+      { id: 4, nombre: 'Arriaga' },
+      { id: 5, nombre: 'Salburua' }
+    ]);
 
-    watch(categoryId, (newCategoryId) => {
-      if (newCategoryId) {
-        fetchActividades();
+    const filteredActividades = computed(() => {
+      let filtered = [...actividades.value];
+
+      // Apply Centro Civico filter
+      if (selectedCentroCivico.value) {
+        if (selectedCentroCivico.value === 'all') {
+          // Do nothing, show all centers
+        } else {
+          filtered = filtered.filter(actividad => {
+            return actividad.centro_civico && actividad.centro_civico.id === parseInt(selectedCentroCivico.value);
+          });
+        }
       }
+
+      // Apply Edad filter
+      if (selectedEdad.value) {
+        filtered = filtered.filter(actividad => {
+          return actividad.edad_min !== null && actividad.edad_min >= parseInt(selectedEdad.value);
+        });
+      }
+
+      // Apply Idioma filter
+      if (selectedIdioma.value) {
+        if (selectedIdioma.value !== '') { // Check if a specific language is selected
+          filtered = filtered.filter(actividad => {
+            return actividad.idioma === selectedIdioma.value;
+          });
+        }
+      }
+
+      // Apply Horario filter
+      if (selectedHorario.value) {
+        if (selectedHorario.value !== '') {
+          filtered = filtered.filter(actividad => {
+            if (!actividad.horarios || actividad.horarios.length === 0) {
+              return false;
+            }
+
+            return actividad.horarios.some(horario => {
+              const horaInicio = parseInt(horario.hora_inicio.substring(0, 2));
+              switch (selectedHorario.value) {
+                case 'manana':
+                  return horaInicio >= 6 && horaInicio < 12;
+                case 'tarde':
+                  return horaInicio >= 12 && horaInicio < 18;
+                case 'noche':
+                  return horaInicio >= 18 || horaInicio < 6;
+                default:
+                  return true;
+              }
+            });
+          });
+        }
+      }
+
+      return filtered;
     });
+
+    const applyFilters = () => {
+      // No need to do anything here.  The `filteredActividades` computed property
+      // will automatically recalculate when the filter refs change.
+    };
+
+    const changeCategory = async () => {
+      setCategory(selectedCategoryId.value);
+      await fetchActividades(); // Re-fetch activities for the new category
+    };
 
     onMounted(async () => {
       await fetchCategorias();
-      // Asignar el ID correcto para la categoría de boxeo
-      const boxeoCategoria = categorias.value.find(cat => cat.nombre.toLowerCase() === 'boxeo');
-      if (boxeoCategoria) {
-        setCategory(boxeoCategoria.id);
-        await fetchActividades();
+
+      // Find the boxeo category
+      const boxeoCategory = categorias.value.find(category => category.nombre.toLowerCase() === 'boxeo');
+
+      if (boxeoCategory) {
+        selectedCategoryId.value = boxeoCategory.id;  // Set initial selection to basket category
+        setCategory(boxeoCategory.id);             // Set the category in the composable
+        await fetchActividades();                   // Fetch the basket activities
       } else {
-        console.error('No se encontró la categoría de boxeo');
+        console.warn("Boxeo category not found.  Loading first category instead.");
+        // Fallback: load the first category if basket isn't found
+        if (categorias.value && categorias.value.length > 0) {
+          selectedCategoryId.value = categorias.value[0].id;
+          setCategory(categorias.value[0].id);
+          await fetchActividades();
+        }
       }
     });
 
@@ -143,227 +241,385 @@ export default {
       return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
     };
 
-
-
     return {
       actividades,
       loading,
       error,
-      categoriaNombre,
-      actividadesFiltradas,
-      edadFilter,
-      idiomaFilter,
-      horarioFilter,
-      categorias: computed(() => categorias.value),
       formatDateTime,
+      centrosCivicos,
+      categoriaNombre,
+      selectedCentroCivico,
+      selectedEdad,
+      selectedIdioma,
+      selectedHorario,
+      filteredActividades,
+      applyFilters,
+      categories: computed(() => categorias.value),
+      selectedCategoryId,
+      changeCategory
     };
   }
 };
 </script>
 
 <style scoped>
-/* General styles */
+/* Styles - No change needed unless you want to adapt the new content */
+/* Base styles */
 .container {
-  background-color: black;
-  color: white;
+  display: flex;
   font-family: sans-serif;
-  height: 90vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  max-width: 100vw;
-  background-image: url(../assets/img/fondoBoxeo.jpg);
+  color: white;
+  background-color: black; /* Fallback color */
+  padding: 0;
+  min-height: 100vh;
+  max-width: 100%;
+  background-image: url(../assets/img/fondoBoxeo.png);
   background-repeat: no-repeat;
-  background-size: 108%;
+  background-size: cover; /* Ajusta la imagen para cubrir el contenedor */
+  background-position: center; /* Centra la imagen */
 }
 
-/* Header styles */
-
-
-.logo {
-  display: flex;
-  align-items: center;
+.titulo {
+  margin-top: 1.5em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para mejorar la legibilidad */
 }
 
-.logo img {
-  width: 40px;
-  margin-right: 10px;
-}
-
-.navigation {
-  display: flex;
-  align-items: center;
-}
-
-.nav-button,
-.login {
-  background-color: transparent;
-  color: white;
-  border: 1px solid white;
-  padding: 5px 15px;
-  margin-left: 10px;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.nav-button.active {
-  background-color: white;
-  color: black;
-}
-
-/* Main Content styles */
-.main-content {
-  display: flex;
-  height: calc(100% - 60px);
-  padding: 0px 40px;
-}
-
-.main-left {
-  width: 55%; /* Fixed width for the left side */
-  flex-shrink: 0; /* Prevent shrinking */
-  padding: 20px;
-  position: sticky; /* Make it stick */
-  top: 0;
-  height: 100vh; /* Occupy full viewport height */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Align items to the top */
-  align-items: flex-start; /* Align items to the left */
+.titulo h1 {
+  font-size: 1em;
+  font-family: Akira;
   text-align: left;
-  font-weight: 900;
-  color: white;
-  letter-spacing: 0.1em;
-  font-size: 1.7em;
-  font-style: italic;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #d9ff00; /* Amarillo para los títulos */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para mejorar la legibilidad */
 }
+.categoria-nombre{
+  font-family: Danger;
+  font-size: 1.3em;
 
-.title {
-  font-size: 5rem;
-  font-weight: bold;
-  color: #ffff00;
-  margin-bottom: 5px;
-  font-family: Arial, sans-serif;
-}
-
-.subtitle {
-  font-size: 3rem;
-  font-style: italic;
-  color: #ffff00;
-  margin-bottom: 20px;
-  font-family: Arial, sans-serif;
-}
-
-/* Filters */
-.filters {
-  margin-top: 20px;
-}
-
-.filtro {
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px;
-}
-
-.filtro select {
-  background-color: transparent;
-  color: white;
-  border: 1px solid white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  margin-right: 10px;
 }
 
 /* Right side: Scrollable Activity Blocks */
-.right-side-container {
-  width: 50%;
-  height: 100vh; /* Set the height of the container */
-  overflow: hidden;
-  /*  Prevent the container from overflowing */
-  padding: 30px 20px;
-}
-
 .right-side-scrollable {
-  width: 100%;
-  height: 100%; /* Set the height of the scrollable area */
   overflow-y: auto;
-  /* Enable vertical scroll */
-  scrollbar-width: thin;
-  /*  thin  auto  none */
-  scrollbar-color: #ffffff transparent;
-  padding-right: 10px; /* Space for the scrollbar */
+  position: relative;
+  /* Required for absolute positioning of fade */
+  height: 100vh;
+  padding: 20px 0px 20px 100px;
+  margin-top: 5% 5% 0% 0%;
 }
 
 /* Scrollbar Styling */
 .right-side-scrollable::-webkit-scrollbar {
-  width: 12px; /* Width of the scrollbar */
+  width: 12px;
+  /* Width of the scrollbar */
+
 }
 
 .right-side-scrollable::-webkit-scrollbar-track {
-  background: transparent; /* Color of the track */
-  border-radius: 10px; /* Rounded corners of the track */
+  height: 80%;
+  width: 8px;
+
 }
 
 .right-side-scrollable::-webkit-scrollbar-thumb {
-  background: #ffffff; /* Color of the scroll thumb */
-  border-radius: 10px; /* Rounded corners of the scroll thumb */
+  background-color: #d9ff00;
+  /* Color of the scroll thumb */
+  border-radius: 8px;
+  /* Rounded corners of the scroll thumb */
+  width: 12px !important;
+
 }
 
 .right-side-scrollable::-webkit-scrollbar-thumb:hover {
-  background: #555; /* Color of the scroll thumb on hover */
+  background-color: white;
+  /* Color of the scroll thumb on hover */
 }
 
-.activity-card {
-  border: 1px solid white;
+
+.right-side {
+  display: flex;
+  flex-direction: column;
   padding: 20px;
+
+}
+
+/* Activity block styles */
+.activity-block {
+  background-color: rgb(0, 0, 0); /* Fondo semi-transparente para el bloque */
+  border:2px solid white;
+  padding: 20px 20px 10px 20px;
   margin-bottom: 20px;
-  border-radius: 10px;
+  border-radius: 25px;
   position: relative;
-  z-index: 1;
+  overflow: hidden;
+  width: 700px;
+  margin-right: 6em;
+  color: white; /* Texto blanco */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); /* Sombra para mejorar la legibilidad */
 }
 
-.activity-card-placeholder {
-  border: 1px solid white;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  position: relative;
-  z-index: 1;
+hr {
+  height: 1px;
+  background-color: white;
+  opacity: 1;
 }
 
-.activity-title {
-  font-size: 2rem;
-  font-style: italic;
-  color: #ffff00;
-  margin-bottom: 10px;
-  font-family: Arial, sans-serif;
+.activity-block.faded {
+  opacity: 0.3;
+  background-color: #d9ff00;
 }
 
-.activity-description {
-  font-size: 0.9rem;
-  margin-bottom: 15px;
-}
-
-.activity-location {
-  font-size: 0.8rem;
-  margin-bottom: 15px;
-}
-
-.location-name {
-  font-weight: bold;
+.activity-block h2 {
+  margin: 0px 0px 10px 10px;
+  letter-spacing: 0.08em;
+  font-size: 3em;
+  font-family: Danger;
   font-style: normal;
+  font-weight: 700;
+  color: #d9ff00; /* Amarillo para los títulos */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para mejorar la legibilidad */
+
 }
 
-.register-button {
-  background-color: #ffff00;
-  color: black;
+.activity-block p {
+  margin-bottom: 0px;
+  font-family: Inter;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.activity-block .center {
+
+  font-size: .85em;
+}
+
+.activity-block .bold {
+  font-weight: 700;
+  font-style: normal;
+  font-family: Akira;
+  font-size: 2em;
+  line-height: 0.8em;
+  margin-top: .3em;
+  padding: 0;
+  letter-spacing: -0.01em;
+  word-wrap: break-word;
+}
+
+.cssbuttons-io {
+  border-radius: 55px;
+  margin-bottom: -.2em;
+  margin-left: .5em;
   border: none;
-  padding: 10px 20px;
+  background: linear-gradient(to right, #879f00, #d9ff00);
+  /* Degradado */
+  color: #000000;
+  /* Letras negras por defecto */
+  overflow: hidden;
+  transition: all 0.4s;
+  /* Transición para todas las propiedades */
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cssbuttons-io span {
+  font-weight: 700;
+  font-style: italic;
+  font-size: 2em;
+  font-family: Danger;
+  padding: 3px 31px 0px 22px;
   cursor: pointer;
-  border-radius: 5px;
+}
+
+.cssbuttons-io::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  /* Fondo blanco por defecto */
+  z-index: -1;
+  /* Poner el degradado detrás del texto */
+  transform: translateX(-100%);
+  /* Ocultar el degradado inicialmente */
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+  /* Transición para la animación */
+}
+
+.cssbuttons-io:hover {
+  color: black;
+  /* Letras negras al hacer hover */
+}
+
+.cssbuttons-io:hover::before {
+  transform: translateX(0);
+  /* Mostrar el degradado al hacer hover */
+}
+
+.cssbuttons-io span:active {
+  transform: scale(0.95);
+}
+
+
+
+
+
+.activity-block .schedule {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+}
+
+/* Scroll Fade Effect */
+.scroll-fade {
+  z-index: 998;
+  position: sticky;
+  bottom: -21px;
+  /* Adjusted to move the fade a bit lower */
+  left: 0;
+  width: 100%;
+  height: 200px;
+  /* Increased the height of the fade */
+  background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #161616ea, #161616);
+  /* Gradient from transparent to #c1272d */
+  pointer-events: none;
+  /* Ensure the fade doesn't interfere with scrolling */
+}
+
+/* Filters (Absolutely Positioned) */
+.filters {
+  position: absolute;
+  top: 100px;
+  /* Adjust as needed to position below the title */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  /* Ensure filters are above other content */
+  width: 100%;
+  /* Ancho completo */
+  padding: 0 15px;
+  /* Espacio a los lados */
+  box-sizing: border-box;
+  /* Asegura que padding no aumente el ancho */
+}
+
+.filtro {
+  background-color: black;
+  color: white;
+
+  margin: 0 auto;
+  /* Centra horizontalmente */
+  max-width: 600px;
+  /* Ancho máximo del filtro */
+}
+
+.filtro select {
+  background-color: transparent !important;
+  color: white;
+  border: 0px;
+  padding: 10px;
+  font-family: Inter;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+}
+
+.filtro option {
+  background-color: #000000;
+  color: white;
+}
+
+.font-weight-bold {
   font-weight: bold;
 }
+/* Responsive design */
+@media (max-width: 1024px) {
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    background: none;
+    background-color: black; /* Asegura que el color de fondo se mantenga */
+  }
 
-.activity-details {
-    font-size: 0.9rem;
-    margin-bottom: 15px;
+  .titulo {
+    margin: 2em 0em;
+    margin-left: 0;
+    text-align: center;
+  }
+
+  .titulo h1 {
+    font-size: 1em;
+    text-align: center;
+  }
+  .categoria-nombre{
+    font-size: 1em;
+  }
+
+  .filters {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    padding: 10px;
+    width: 90%;
+    box-sizing: border-box;
+  }
+
+  .filtro {
+    max-width: 100%;
+    flex-direction: column;
+  }
+
+  .filtro select {
+    margin-bottom: 0.5em;
+    width: 95%;
+    box-sizing: border-box;
+  }
+
+  .right-side-scrollable {
+    width: 100%;
+    margin-top: 1em;
+    margin-left: 0;
+    height: auto;
+    box-sizing: border-box;
+    padding: 20px; /* Añadido: Espaciado para el contenido */
+  }
+
+  .right-side {
+    padding: 0; /* Añadido:  Elimina padding interno */
+  }
+
+  .activity-block {
+    width: 100%;  /* Ocupa todo el ancho disponible */
+    margin-right: 0; /* Elimina margen derecho */
+    margin-bottom: 20px; /* Restaura el margen inferior */
+    padding: 20px; /* Reduce el padding para que quepa en pantallas más pequeñas */
+  }
+
+  .activity-block h2 {
+    font-size: 3em;
+  }
+
+  .activity-block p {
+    font-size: 1em;
+  }
+
+  .cssbuttons-io {
+    width: 100%; /*Boton ocupar todo el ancho*/
+    display: flex;
+    justify-content: center;
+  
+  }
+
+  .cssbuttons-io span {
+  font-size: 1.5em;
+  font-family: Danger;
+  padding: 3px 31px 0px 22px;  }
+
+  
 }
 </style>
