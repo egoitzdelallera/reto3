@@ -1,10 +1,20 @@
 <template>
   <div class="container">
+    <!-- Modal de inscripción (renderizado condicionalmente) -->
+    <InscriptionForm
+      v-if="showInscriptionModal"
+      :actividad="selectedActividad"
+      @inscription-success="handleInscriptionSuccess"
+      @inscription-error="handleInscriptionError"
+      @close="closeInscriptionModal"
+    />
+
     <div class="row d-flex align-items-center justify-content-around">
       <div class="col-12 col-md-4 titulo">
         <h1 class="ps-4">Actividades</h1>
         <h1 class="ps-4">de <span class="categoria-nombre">{{ categoriaNombre.toLowerCase() }}</span></h1>
       </div>
+
       <!-- Filters -->
       <div class="col-md-4 filters">
         <div class="filtro rounded d-flex flex-column flex-md-row justify-content-around">
@@ -67,7 +77,8 @@
               <div class="row d-flex justify-content-center align-items-between">
                 <div class="col-5 col-md-5">
                   <p>
-                    Monitor: {{ actividad.monitor ? actividad.monitor.nombre : 'N/A' }} {{ actividad.monitor ? actividad.monitor.apellido : 'N/A' }}
+                    Monitor: {{ actividad.monitor ? actividad.monitor.nombre : 'N/A' }} {{ actividad.monitor ?
+                    actividad.monitor.apellido : 'N/A' }}
                   </p>
                   <p>Edad Mínima: {{ actividad.edad_min !== null ? actividad.edad_min : 'N/A' }}</p>
                   <p class="w-75">
@@ -87,7 +98,7 @@
                   <p class="center bold"> {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
                 </div>
                 <div class="col-4 col-md-4 d-flex justify-content-center align-items-center">
-                  <button class="cssbuttons-io">
+                  <button class="cssbuttons-io" @click="openInscriptionModal(actividad)">
                     <span>¡Inscríbete!</span>
                   </button>
                 </div>
@@ -102,11 +113,16 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, nextTick } from 'vue';
 import useActividades from '../composables/useActividades';
-import useCategorias from "../composables/useCategorias"
+import useCategorias from "../composables/useCategorias";
+import { Modal } from 'bootstrap';
+import InscriptionForm from './InscriptionForm.vue';
 
 export default {
+  components: {
+    InscriptionForm
+  },
   setup() {
     const { actividades, loading, error, fetchActividades, categoryId, setCategory } = useActividades();
     const { categorias, fetchCategorias } = useCategorias()
@@ -116,16 +132,17 @@ export default {
       return categoria ? categoria.nombre.toUpperCase() : 'FÚTBOL';
     });
 
-    // Local refs for filter selections
     const selectedCentroCivico = ref('');
     const selectedEdad = ref('');
     const selectedIdioma = ref('');
     const selectedHorario = ref('');
-
-    // Local ref for the selected category
     const selectedCategoryId = ref(null);
 
-    // Fetch centros civicos (replace with your actual data fetching)
+    // Refs para el modal y la actividad seleccionada
+    const inscriptionModal = ref(null);
+    const selectedActividad = ref(null);
+    const showInscriptionModal = ref(false); // Controla si se muestra el modal
+
     const centrosCivicos = ref([
       { id: 1, nombre: 'Ibaiondo' },
       { id: 2, nombre: 'Aldabe' },
@@ -137,7 +154,7 @@ export default {
     const filteredActividades = computed(() => {
       let filtered = [...actividades.value];
 
-      // Apply Centro Civico filter
+      // Apply filters (Centro Civico, Edad, Idioma, Horario)
       if (selectedCentroCivico.value) {
         if (selectedCentroCivico.value === 'all') {
           // Do nothing, show all centers
@@ -148,14 +165,12 @@ export default {
         }
       }
 
-      // Apply Edad filter
       if (selectedEdad.value) {
         filtered = filtered.filter(actividad => {
           return actividad.edad_min !== null && actividad.edad_min >= parseInt(selectedEdad.value);
         });
       }
 
-      // Apply Idioma filter
       if (selectedIdioma.value) {
         if (selectedIdioma.value !== '') { // Check if a specific language is selected
           filtered = filtered.filter(actividad => {
@@ -164,7 +179,6 @@ export default {
         }
       }
 
-      // Apply Horario filter
       if (selectedHorario.value) {
         if (selectedHorario.value !== '') {
           filtered = filtered.filter(actividad => {
@@ -237,8 +251,47 @@ export default {
       const formattedStartTime = new Date(`1970-01-01T${startTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
       const formattedEndTime = new Date(`1970-01-01T${endTime}`).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
-      return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
+      return `${dayOfWeek}, ${formattedStartTime} - ${formattedEndTime}`;
     };
+
+    // Función para abrir el modal de inscripción
+    const openInscriptionModal = (actividad) => {
+      selectedActividad.value = actividad;
+      showInscriptionModal.value = true; // Muestra el modal
+
+      // Espera a que el DOM se actualice y luego inicializa el modal
+      nextTick(() => {
+        const inscriptionModalEl = document.getElementById('inscriptionModal');
+        if (inscriptionModalEl) {
+          inscriptionModal.value = new Modal(inscriptionModalEl);
+          inscriptionModal.value.show();
+        } else {
+          console.error('El elemento con ID "inscriptionModal" no se encontró en el DOM.');
+        }
+      });
+    };
+
+    // Función para manejar el éxito de la inscripción
+    const handleInscriptionSuccess = (data) => {
+      console.log("Inscripción exitosa en el componente padre:", data);
+      closeInscriptionModal();
+    };
+
+    // Función para manejar el error de la inscripción
+    const handleInscriptionError = (error) => {
+      console.error("Error en la inscripción en el componente padre:", error);
+      // Realizar acciones de manejo de errores
+    };
+
+    // Función para cerrar el modal
+    const closeInscriptionModal = () => {
+       if (inscriptionModal.value) {
+        inscriptionModal.value.hide(); // Cierra el modal de Bootstrap
+      }
+      showInscriptionModal.value = false; // Oculta el componente InscriptionForm
+      selectedActividad.value = null; // Limpia la actividad seleccionada
+    };
+
 
     return {
       actividades,
@@ -255,7 +308,13 @@ export default {
       applyFilters,
       categories: computed(() => categorias.value),
       selectedCategoryId,
-      changeCategory
+      changeCategory,
+      openInscriptionModal,
+      selectedActividad,
+      handleInscriptionSuccess,
+      handleInscriptionError,
+      showInscriptionModal,
+      closeInscriptionModal
     };
   }
 };
@@ -323,7 +382,7 @@ export default {
 }
 
 .right-side-scrollable::-webkit-scrollbar-thumb {
-  background-color: #00ffbc;
+  background-color: #000000;
   /* Color of the scroll thumb */
   border-radius: 8px;
   /* Rounded corners of the scroll thumb */
