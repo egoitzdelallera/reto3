@@ -285,8 +285,8 @@ export default {
 
     onMounted(async () => {
       await fetchCategorias();
-      const futbolCategoria = categorias.value.find(cat => cat.nombre.toLowerCase() === 'fútbol' || cat.nombre.toLowerCase() === 'futbol' || cat.nombre.toLowerCase() === 'football');
-
+      const futbolCategoria = categorias.value.find(cat => cat.nombre.toLowerCase() === 'futbol' || cat.nombre.toLowerCase() === 'Futbol' || cat.nombre.toLowerCase() === 'fútbol');
+      
       if (futbolCategoria) {
         selectedCategoryId.value = futbolCategoria.id;
         setCategory(futbolCategoria.id);

@@ -8,30 +8,41 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Mail\InscriptionConfirmation;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Mail; // Import the Mail facade
+use App\Mail\InscriptionConfirmation;  // Import the Mailable
+use Illuminate\Support\Facades\Log;
 
 class SendInscriptionEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $inscriptionData;
-    protected $email;
+    protected $userEmail;
 
     /**
      * Create a new job instance.
+     *
+     * @param  array  $inscriptionData
+     * @param  string  $userEmail
+     * @return void
      */
-    public function __construct(array $inscriptionData, string $email)
+    public function __construct(array $inscriptionData, string $userEmail)
     {
         $this->inscriptionData = $inscriptionData;
-        $this->email = $email;
+        $this->userEmail = $userEmail;
     }
 
     /**
      * Execute the job.
+     *
+     * @return void
      */
-    public function handle(): void
+    public function handle()
     {
-         Mail::to($this->email)->send(new InscriptionConfirmation($this->inscriptionData));
+        try {
+             Mail::to($this->userEmail)->send(new InscriptionConfirmation($this->inscriptionData));
+        } catch (\Exception $e) {
+             Log::error('Error sending inscription confirmation email: ' . $e->getMessage());
+        }
     }
 }

@@ -5,11 +5,9 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class InscriptionConfirmation extends Mailable
+class InscriptionConfirmation extends Mailable implements ShouldQueue // Implement ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -17,6 +15,8 @@ class InscriptionConfirmation extends Mailable
 
     /**
      * Create a new message instance.
+     *
+     * @param array $inscriptionData
      */
     public function __construct(array $inscriptionData)
     {
@@ -24,35 +24,14 @@ class InscriptionConfirmation extends Mailable
     }
 
     /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'Confirmación de Inscripción a Actividad',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.inscription_confirmation', // Crear una vista en resources/views/emails/inscription_confirmation.blade.php
-            with: [
-                'inscriptionData' => $this->inscriptionData,
-            ],
-        );
-    }
-
-    /**
-     * Get the attachments for the message.
+     * Build the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return $this
      */
-    public function attachments(): array
+    public function build()
     {
-        return [];
+        return $this->subject('Confirmación de Inscripción')
+                    ->view('emails.inscription_confirmation') // Path to your email view
+                    ->with('inscriptionData', $this->inscriptionData);  // Pass inscriptionData to the view
     }
 }

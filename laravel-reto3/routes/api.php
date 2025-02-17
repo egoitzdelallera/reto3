@@ -1,12 +1,14 @@
 <?php
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TiposActividadController;
 use App\Http\Controllers\ActividadController;
 use App\Http\Controllers\CentroCivicoController;
 use App\Http\Controllers\MonitorController;
+
+use App\Http\Controllers\TestEmailController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -49,3 +51,5 @@ Route::middleware('auth:api')->group(function () {
 
 Route::get('/actividad/{id}', [ActividadController::class, 'show']);
 Route::get('/monitores', [MonitorController::class, 'index']);
+
+Route::post('/test-email', [TestEmailController::class, 'sendTestEmail']);

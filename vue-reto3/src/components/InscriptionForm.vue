@@ -1,7 +1,7 @@
 <template>
   <div class="modal fade" id="inscriptionModal" tabindex="-1" aria-labelledby="inscriptionModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog "> 
+    <div class="modal-dialog ">
       <div class="modal-content bg-black text-white">
         <div class="modal-header">
           <h5 class="modal-title" id="inscriptionModalLabel">Inscripción a la actividad: {{ actividad ? actividad.nombre : '' }}
@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -96,6 +96,38 @@ export default {
       correo: ''
     });
 
+    const existingUserData = ref(null); // Store existing user data
+
+    // Watch for changes in the DNI field
+    watch(
+      () => inscriptionData.value.dni,
+      async (newDni) => {
+        if (newDni && newDni.length > 0) {
+          try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.get(`http://localhost:8000/api/participante/${newDni}`, { // Replace with your API endpoint
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+
+            if (response.data.participante) { // Adjust based on your API response
+              existingUserData.value = response.data.participante; // Store the existing user data
+              // Automatically fill the form with existing data
+              inscriptionData.value = { ...response.data.participante, dni: newDni }; // Keep the entered DNI
+              alert('Ya existe un participante con este DNI. Se han precargado los datos.');
+            } else {
+              existingUserData.value = null; // Clear if not found
+            }
+          } catch (error) {
+            existingUserData.value = null; // Clear on error
+          }
+        } else {
+          existingUserData.value = null; // Clear if DNI is empty
+        }
+      }
+    );
+
     const submitInscription = async () => {
       try {
         // Verificar si actividad tiene un valor antes de acceder a sus propiedades
@@ -107,7 +139,8 @@ export default {
 
         const data = {
           ...inscriptionData.value,
-          id_actividad: props.actividad.id // Obtener el ID de la actividad de los props
+          id_actividad: props.actividad.id, // Obtener el ID de la actividad de los props
+          ...(existingUserData.value ? { use_existing: true } : {}) // Flag to use existing data
         };
         const token = localStorage.getItem('access_token');
 
@@ -138,10 +171,8 @@ export default {
         };
 
       } catch (error) {
-        console.error('Error al inscribir:', error);
         if (error.response) {
-          console.error('Datos del error:', error.response.data);
-          alert('Error al inscribir: ' + error.response.data.message);
+          alert('Error al inscribir: este correo o DNI ya estan registrados en otra actividad');
           emit('inscription-error', error.response.data);  // Emitir evento de error
         } else {
           alert('Error al inscribir. Verifica tu conexión o inténtalo más tarde.');
@@ -157,7 +188,8 @@ export default {
     return {
       inscriptionData,
       submitInscription,
-      emitClose
+      emitClose,
+      existingUserData
     };
   }
 };
