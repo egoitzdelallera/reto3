@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Actividad;
 use Validator;
+use App\Models\Horario;
 
 class ActividadController extends Controller
 {
@@ -15,6 +16,7 @@ class ActividadController extends Controller
     {
         return response()->json(Actividad::all());
     }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -32,9 +34,15 @@ class ActividadController extends Controller
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string|max:255',
+            'idioma' => 'required|string|max:255',
+            'edad_min' => 'required|numeric',
+            'edad_max' => 'required|numeric',
             'id_tipo_actividad' => 'required|exists:tipos_actividades,id',
             'id_centro_civico' => 'required|exists:centros_civicos,id',
-            'id_monitor' => 'required|exists:monitores,id'
+            'id_monitor' => 'required|exists:monitores,id',
+            'fecha' => 'required|date',
+            'hora_inicio' => 'required|date_format:H:i',
+            'hora_fin' => 'required|date_format:H:i'
         ]);
 
         if ($validator->fails()) {
@@ -44,13 +52,22 @@ class ActividadController extends Controller
         $actividad = new Actividad();
         $actividad->nombre = $request->input('nombre');
         $actividad->descripcion = $request->input('descripcion');
+        $actividad->idioma = $request->input('idioma');
+        $actividad->edad_min = $request->input('edad_min');
+        $actividad->edad_max = $request->input('edad_max');
         $actividad->id_tipo_actividad = $request->input('id_tipo_actividad');
         $actividad->id_centro_civico = $request->input('id_centro_civico');
         $actividad->id_monitor = $request->input('id_monitor');
-
         $actividad->save();
 
-        return response()->json(['message' => 'Actividad creada correctamente', 'actividad' => $actividad]);
+        $horario = new Horario();
+        $horario->fecha = $request->input('fecha');  // Usamos 'fecha' en lugar de 'dia'
+        $horario->hora_inicio = $request->input('hora_inicio');
+        $horario->hora_fin = $request->input('hora_fin');
+        $horario->id_actividad = $actividad->id;  // Relacionamos el horario con la actividad creada
+        $horario->save();
+
+        return response()->json(['message' => 'Actividad y horario creados correctamente', 'actividad' => $actividad, 'horario' => $horario], 201);
     }
 
     /**
@@ -58,9 +75,19 @@ class ActividadController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $actividades = Actividad::where('id_tipo_actividad', $id)
+            ->with(['centroCivico', 'monitor', 'tipoActividad', 'horarios']) // Eager load relationships
+            ->get();
+    
+        // Add this line for debugging:
+        // dd($actividades->toArray());
+    
+        if ($actividades->isEmpty()) {
+            return response()->json(['message' => 'No se encontraron actividades para el tipo de actividad especificado'], 404);
+        }
+    
+        return response()->json($actividades);
     }
-
     /**
      * Show the form for editing the specified resource.
      */

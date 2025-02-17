@@ -549,6 +549,7 @@ class ComposerStaticInit626b9e7ddd47fb7eff9aaa53cce0c9ad
         'App\\Http\\Controllers\\MonitorController' => __DIR__ . '/../..' . '/app/Http/Controllers/MonitorController.php',
         'App\\Http\\Controllers\\TiposActividadController' => __DIR__ . '/../..' . '/app/Http/Controllers/TiposActividadController.php',
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
+        'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Models\\Actividad' => __DIR__ . '/../..' . '/app/Models/Actividad.php',
         'App\\Models\\ActividadesUsuario' => __DIR__ . '/../..' . '/app/Models/ActividadesUsuario.php',
         'App\\Models\\CentroCivico' => __DIR__ . '/../..' . '/app/Models/CentroCivico.php',

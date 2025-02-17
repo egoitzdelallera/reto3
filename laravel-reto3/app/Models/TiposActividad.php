@@ -12,9 +12,6 @@ class TiposActividad extends Model
     [
         'nombre',
         'descripcion',
-        'idioma',
-        'edad_min',
-        'edad_max',
         'multimedia'
     ];
 

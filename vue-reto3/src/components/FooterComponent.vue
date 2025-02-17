@@ -45,6 +45,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    z-index:999;
 }
 
 .footer__logo img {

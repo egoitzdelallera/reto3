@@ -3,13 +3,13 @@
     <div class="row d-flex align-items-center justify-content-around">
       <div class="col-12 col-md-4 titulo">
         <h1 class="ps-4">ACTIVIDADES</h1>
-        <h1>DE {{ categoriaNombre }}</h1>
+        <h1 class="ps-4">DE <span class="categoria-nombre">{{ categoriaNombre }}</span></h1>
       </div>
       <!-- Filters -->
       <div class="col-md-4 filters">
         <div class="filtro rounded d-flex flex-column flex-md-row justify-content-around">
-
-          <select id="centroCivico" v-model="selectedCentroCivico" @change="applyFilters" :class="{ 'font-weight-bold': selectedCentroCivico }">
+          <select id="centroCivico" v-model="selectedCentroCivico" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedCentroCivico }">
             <option value="" disabled selected hidden>Centro Cívico</option>
             <option value="all">Todos los centros</option>
             <option v-for="centro in centrosCivicos" :key="centro.id" :value="centro.id">
@@ -24,20 +24,21 @@
             <option value="10">+ 10 años</option>
             <option value="16">+ 16 años</option>
           </select>
-          <select id="idioma" v-model="selectedIdioma" @change="applyFilters" :class="{ 'font-weight-bold': selectedIdioma }">
+          <select id="idioma" v-model="selectedIdioma" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedIdioma }">
             <option value="" disabled selected hidden>Idioma</option>
             <option value="">Todos</option>
             <option value="Español">Español</option>
             <option value="Euskera">Euskera</option>
           </select>
-          <select id="horario" v-model="selectedHorario" @change="applyFilters" :class="{ 'font-weight-bold': selectedHorario }">
+          <select id="horario" v-model="selectedHorario" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedHorario }">
             <option value="" disabled selected hidden>Horario</option>
             <option value="">Todos</option>
             <option value="manana">Mañana</option>
             <option value="tarde">Tarde</option>
             <option value="noche">Noche</option>
           </select>
-        
         </div>
       </div>
 
@@ -87,7 +88,7 @@
                 </div>
                 <div class="col-4 col-md-4 d-flex justify-content-center align-items-center">
                   <button class="cssbuttons-io">
-                    <span>¡Inscríbete!</span>
+                    <span>Inscribete</span>
                   </button>
                 </div>
               </div>
@@ -105,16 +106,14 @@ import { computed, ref, onMounted, watch } from 'vue';
 import useActividades from '../composables/useActividades';
 import useCategorias from "../composables/useCategorias"
 
-
-
 export default {
   setup() {
     const { actividades, loading, error, fetchActividades, categoryId, setCategory } = useActividades();
-    const {categorias, fetchCategorias} = useCategorias()
+    const { categorias, fetchCategorias } = useCategorias()
 
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
-      return categoria ? categoria.nombre.toUpperCase() : 'TENIS';
+      return categoria ? categoria.nombre.toUpperCase() : 'BOXEO';
     });
 
     // Local refs for filter selections
@@ -152,7 +151,7 @@ export default {
       // Apply Edad filter
       if (selectedEdad.value) {
         filtered = filtered.filter(actividad => {
-            return actividad.edad_min !== null && actividad.edad_min >= parseInt(selectedEdad.value);
+          return actividad.edad_min !== null && actividad.edad_min >= parseInt(selectedEdad.value);
         });
       }
 
@@ -160,7 +159,7 @@ export default {
       if (selectedIdioma.value) {
         if (selectedIdioma.value !== '') { // Check if a specific language is selected
           filtered = filtered.filter(actividad => {
-              return actividad.idioma === selectedIdioma.value;
+            return actividad.idioma === selectedIdioma.value;
           });
         }
       }
@@ -206,15 +205,15 @@ export default {
     onMounted(async () => {
       await fetchCategorias();
 
-      // Find the basket category (ID 2)
-      const basketCategory = categorias.value.find(category => category.id === 2);
+      // Find the boxeo category
+      const boxeoCategory = categorias.value.find(category => category.nombre.toLowerCase() === 'boxeo');
 
-      if (basketCategory) {
-        selectedCategoryId.value = basketCategory.id;  // Set initial selection to basket category
-        setCategory(basketCategory.id);             // Set the category in the composable
+      if (boxeoCategory) {
+        selectedCategoryId.value = boxeoCategory.id;  // Set initial selection to basket category
+        setCategory(boxeoCategory.id);             // Set the category in the composable
         await fetchActividades();                   // Fetch the basket activities
       } else {
-        console.warn("Basket category (ID 2) not found.  Loading first category instead.");
+        console.warn("Boxeo category not found.  Loading first category instead.");
         // Fallback: load the first category if basket isn't found
         if (categorias.value && categorias.value.length > 0) {
           selectedCategoryId.value = categorias.value[0].id;
@@ -270,29 +269,34 @@ export default {
   display: flex;
   font-family: sans-serif;
   color: white;
-  background-color: #98002e;
+  background-color: black; /* Fallback color */
   padding: 0;
   min-height: 100vh;
   max-width: 100%;
-  background-image: url(../assets/img/fondoCompletoBasket2.png);
+  background-image: url(../assets/img/fondoBoxeo.png);
   background-repeat: no-repeat;
-  background-size: 67%;
+  background-size: cover; /* Ajusta la imagen para cubrir el contenedor */
+  background-position: center; /* Centra la imagen */
 }
 
 .titulo {
   margin-top: 1.5em;
-  margin-left: 1.1em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para mejorar la legibilidad */
 }
 
 .titulo h1 {
-  font-size: 1.8em;
-  font-family: Thunder;
+  font-size: 1em;
+  font-family: Akira;
   text-align: left;
   margin: 0;
-  font-weight: 800;
-  font-style: italic;
-  line-height: 0.8;
-  color:#f9a01b;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #d9ff00; /* Amarillo para los títulos */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para mejorar la legibilidad */
+}
+.categoria-nombre{
+  font-family: Danger;
+  font-size: 1.3em;
 
 }
 
@@ -304,24 +308,23 @@ export default {
   height: 100vh;
   padding: 20px 0px 20px 100px;
   margin-top: 5% 5% 0% 0%;
-  
 }
 
 /* Scrollbar Styling */
 .right-side-scrollable::-webkit-scrollbar {
   width: 12px;
   /* Width of the scrollbar */
-  
+
 }
 
 .right-side-scrollable::-webkit-scrollbar-track {
   height: 80%;
   width: 8px;
-  
+
 }
 
 .right-side-scrollable::-webkit-scrollbar-thumb {
-  background-color: #f9a01b;
+  background-color: #d9ff00;
   /* Color of the scroll thumb */
   border-radius: 8px;
   /* Rounded corners of the scroll thumb */
@@ -344,16 +347,19 @@ export default {
 
 /* Activity block styles */
 .activity-block {
-  background-color: #98002e;
-  border: 4px dashed #f9a01b;
+  background-color: rgb(0, 0, 0); /* Fondo semi-transparente para el bloque */
+  border:2px solid white;
   padding: 20px 20px 10px 20px;
   margin-bottom: 20px;
   border-radius: 25px;
   position: relative;
   overflow: hidden;
   width: 700px;
-  margin-right:6em;
+  margin-right: 6em;
+  color: white; /* Texto blanco */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8); /* Sombra para mejorar la legibilidad */
 }
+
 hr {
   height: 1px;
   background-color: white;
@@ -362,15 +368,18 @@ hr {
 
 .activity-block.faded {
   opacity: 0.3;
-  background-color: #98002e;
+  background-color: #d9ff00;
 }
 
 .activity-block h2 {
-  margin: 0;
-  font-size: 4em;
-  font-family: Thunder;
+  margin: 0px 0px 10px 10px;
+  letter-spacing: 0.08em;
+  font-size: 3em;
+  font-family: Danger;
   font-style: normal;
   font-weight: 700;
+  color: #d9ff00; /* Amarillo para los títulos */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Sombra para mejorar la legibilidad */
 
 }
 
@@ -389,12 +398,13 @@ hr {
 .activity-block .bold {
   font-weight: 700;
   font-style: normal;
-  font-family: Thunder;
-  font-size: 4em;
-  margin-top: -.2em;
+  font-family: Akira;
+  font-size: 2em;
+  line-height: 0.8em;
+  margin-top: .3em;
   padding: 0;
   letter-spacing: -0.01em;
-
+  word-wrap: break-word;
 }
 
 .cssbuttons-io {
@@ -402,9 +412,9 @@ hr {
   margin-bottom: -.2em;
   margin-left: .5em;
   border: none;
-  background: linear-gradient(to right, #f9a01bc8, #f9a01b);
+  background: linear-gradient(to right, #879f00, #d9ff00);
   /* Degradado */
-  color: #98002e;
+  color: #000000;
   /* Letras negras por defecto */
   overflow: hidden;
   transition: all 0.4s;
@@ -418,9 +428,9 @@ hr {
 .cssbuttons-io span {
   font-weight: 700;
   font-style: italic;
-  font-size: 2.5em;
-  font-family: Thunder;
-  padding: 3px 24px 0px 20px;
+  font-size: 2em;
+  font-family: Danger;
+  padding: 3px 31px 0px 22px;
   cursor: pointer;
 }
 
@@ -475,7 +485,7 @@ hr {
   width: 100%;
   height: 200px;
   /* Increased the height of the fade */
-  background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #98002ed6, #98002e);
+  background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #161616ea, #161616);
   /* Gradient from transparent to #c1272d */
   pointer-events: none;
   /* Ensure the fade doesn't interfere with scrolling */
@@ -532,7 +542,7 @@ hr {
     flex-direction: column;
     align-items: stretch;
     background: none;
-    background-color: #98002e;
+    background-color: black; /* Asegura que el color de fondo se mantenga */
   }
 
   .titulo {
@@ -542,8 +552,11 @@ hr {
   }
 
   .titulo h1 {
-    font-size: 2em;
+    font-size: 1em;
     text-align: center;
+  }
+  .categoria-nombre{
+    font-size: 1em;
   }
 
   .filters {
@@ -595,30 +608,18 @@ hr {
     font-size: 1em;
   }
 
-  
-
-  
-
   .cssbuttons-io {
     width: 100%; /*Boton ocupar todo el ancho*/
     display: flex;
     justify-content: center;
+  
   }
 
-  .cssbuttons-io span{
-    font-size: 1.8em; /*Bajar tamaño de fuente del boton*/
-  }
+  .cssbuttons-io span {
+  font-size: 1.5em;
+  font-family: Danger;
+  padding: 3px 31px 0px 22px;  }
 
-  /* Ajustes para pantallas aún más pequeñas (móviles) */
-  @media (max-width: 576px) {
-    .titulo h1 {
-      font-size: 2em; /* Aún más pequeño en móviles */
-    }
-
-
-    .activity-block .bold {
-      font-size: 2.5em;
-    }
-  }
+  
 }
 </style>

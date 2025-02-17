@@ -2,14 +2,14 @@
   <div class="container">
     <div class="row d-flex align-items-center justify-content-around">
       <div class="col-12 col-md-4 titulo">
-        <h1 class="ps-4">ACTIVIDADES</h1>
-        <h1>DE {{ categoriaNombre }}</h1>
+        <h1 class="ps-4">Actividades</h1>
+        <h1 class="ps-4">de <span class="categoria-nombre">{{ categoriaNombre.toLowerCase() }}</span></h1>
       </div>
       <!-- Filters -->
       <div class="col-md-4 filters">
         <div class="filtro rounded d-flex flex-column flex-md-row justify-content-around">
-
-          <select id="centroCivico" v-model="selectedCentroCivico" @change="applyFilters" :class="{ 'font-weight-bold': selectedCentroCivico }">
+          <select id="centroCivico" v-model="selectedCentroCivico" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedCentroCivico }">
             <option value="" disabled selected hidden>Centro Cívico</option>
             <option value="all">Todos los centros</option>
             <option v-for="centro in centrosCivicos" :key="centro.id" :value="centro.id">
@@ -24,20 +24,21 @@
             <option value="10">+ 10 años</option>
             <option value="16">+ 16 años</option>
           </select>
-          <select id="idioma" v-model="selectedIdioma" @change="applyFilters" :class="{ 'font-weight-bold': selectedIdioma }">
+          <select id="idioma" v-model="selectedIdioma" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedIdioma }">
             <option value="" disabled selected hidden>Idioma</option>
             <option value="">Todos</option>
             <option value="Español">Español</option>
             <option value="Euskera">Euskera</option>
           </select>
-          <select id="horario" v-model="selectedHorario" @change="applyFilters" :class="{ 'font-weight-bold': selectedHorario }">
+          <select id="horario" v-model="selectedHorario" @change="applyFilters"
+            :class="{ 'font-weight-bold': selectedHorario }">
             <option value="" disabled selected hidden>Horario</option>
             <option value="">Todos</option>
             <option value="manana">Mañana</option>
             <option value="tarde">Tarde</option>
             <option value="noche">Noche</option>
           </select>
-        
         </div>
       </div>
 
@@ -105,16 +106,14 @@ import { computed, ref, onMounted, watch } from 'vue';
 import useActividades from '../composables/useActividades';
 import useCategorias from "../composables/useCategorias"
 
-
-
 export default {
   setup() {
     const { actividades, loading, error, fetchActividades, categoryId, setCategory } = useActividades();
-    const {categorias, fetchCategorias} = useCategorias()
+    const { categorias, fetchCategorias } = useCategorias()
 
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
-      return categoria ? categoria.nombre.toUpperCase() : 'TENIS';
+      return categoria ? categoria.nombre.toUpperCase() : 'FÚTBOL';
     });
 
     // Local refs for filter selections
@@ -152,7 +151,7 @@ export default {
       // Apply Edad filter
       if (selectedEdad.value) {
         filtered = filtered.filter(actividad => {
-            return actividad.edad_min !== null && actividad.edad_min >= parseInt(selectedEdad.value);
+          return actividad.edad_min !== null && actividad.edad_min >= parseInt(selectedEdad.value);
         });
       }
 
@@ -160,7 +159,7 @@ export default {
       if (selectedIdioma.value) {
         if (selectedIdioma.value !== '') { // Check if a specific language is selected
           filtered = filtered.filter(actividad => {
-              return actividad.idioma === selectedIdioma.value;
+            return actividad.idioma === selectedIdioma.value;
           });
         }
       }
@@ -206,16 +205,15 @@ export default {
     onMounted(async () => {
       await fetchCategorias();
 
-      // Find the basket category (ID 2)
-      const basketCategory = categorias.value.find(category => category.id === 2);
+      // Find the futbol category
+      const futbolCategoria = categorias.value.find(cat => cat.nombre.toLowerCase() === 'fútbol' || cat.nombre.toLowerCase() === 'futbol' || cat.nombre.toLowerCase() === 'football');
 
-      if (basketCategory) {
-        selectedCategoryId.value = basketCategory.id;  // Set initial selection to basket category
-        setCategory(basketCategory.id);             // Set the category in the composable
-        await fetchActividades();                   // Fetch the basket activities
+      if (futbolCategoria) {
+        selectedCategoryId.value = futbolCategoria.id;
+        setCategory(futbolCategoria.id);
+        await fetchActividades();
       } else {
-        console.warn("Basket category (ID 2) not found.  Loading first category instead.");
-        // Fallback: load the first category if basket isn't found
+        console.warn("Fútbol category not found. Loading first category instead.");
         if (categorias.value && categorias.value.length > 0) {
           selectedCategoryId.value = categorias.value[0].id;
           setCategory(categorias.value[0].id);
@@ -264,36 +262,43 @@ export default {
 </script>
 
 <style scoped>
-/* Styles - No change needed unless you want to adapt the new content */
 /* Base styles */
 .container {
   display: flex;
   font-family: sans-serif;
   color: white;
-  background-color: #98002e;
+  background-color: #00ffbc;
+  /* Fallback color */
   padding: 0;
   min-height: 100vh;
   max-width: 100%;
-  background-image: url(../assets/img/fondoCompletoBasket2.png);
+  background-image: url(../assets/img/fondoCompletoFutbol.png);
   background-repeat: no-repeat;
-  background-size: 67%;
+  background-size: cover;
+  /* Ajusta la imagen para cubrir el contenedor */
+  background-position: center;
+  /* Centra la imagen */
 }
 
 .titulo {
   margin-top: 1.5em;
-  margin-left: 1.1em;
+  margin-left: 1.5em;
 }
 
 .titulo h1 {
-  font-size: 1.8em;
-  font-family: Thunder;
+  font-size: 1.5em;
+  font-family: Inter;
+  /* Usar Inter */
   text-align: left;
   margin: 0;
-  font-weight: 800;
+  font-weight: 300;
   font-style: italic;
+  letter-spacing: -0.06em;
   line-height: 0.8;
-  color:#f9a01b;
-
+  color: #000000;
+}
+.categoria-nombre {
+  font-weight: 700;
 }
 
 /* Right side: Scrollable Activity Blocks */
@@ -304,29 +309,25 @@ export default {
   height: 100vh;
   padding: 20px 0px 20px 100px;
   margin-top: 5% 5% 0% 0%;
-  
 }
 
 /* Scrollbar Styling */
 .right-side-scrollable::-webkit-scrollbar {
   width: 12px;
   /* Width of the scrollbar */
-  
 }
 
 .right-side-scrollable::-webkit-scrollbar-track {
   height: 80%;
   width: 8px;
-  
 }
 
 .right-side-scrollable::-webkit-scrollbar-thumb {
-  background-color: #f9a01b;
+  background-color: #00ffbc;
   /* Color of the scroll thumb */
   border-radius: 8px;
   /* Rounded corners of the scroll thumb */
   width: 12px !important;
-
 }
 
 .right-side-scrollable::-webkit-scrollbar-thumb:hover {
@@ -334,44 +335,46 @@ export default {
   /* Color of the scroll thumb on hover */
 }
 
-
 .right-side {
   display: flex;
   flex-direction: column;
   padding: 20px;
-
 }
 
 /* Activity block styles */
 .activity-block {
-  background-color: #98002e;
-  border: 4px dashed #f9a01b;
+  background-color: rgb(255, 255, 255);
+  /* Fondo semi-transparente para el bloque */
   padding: 20px 20px 10px 20px;
   margin-bottom: 20px;
-  border-radius: 25px;
+  border-radius: 10px;
   position: relative;
   overflow: hidden;
   width: 700px;
-  margin-right:6em;
+  margin-right: 6em;
+  color: rgb(0, 0, 0);
 }
+
 hr {
   height: 1px;
-  background-color: white;
+  background-color: rgb(0, 0, 0);
   opacity: 1;
 }
 
 .activity-block.faded {
   opacity: 0.3;
-  background-color: #98002e;
+  background-color: black;
 }
 
 .activity-block h2 {
   margin: 0;
-  font-size: 4em;
-  font-family: Thunder;
+  font-size: 3.5em;
+  font-family: Inter;
+  /* Usar Inter */
   font-style: normal;
-  font-weight: 700;
-
+  letter-spacing: -0.07em;
+  font-weight: 500;
+  color: #000000;
 }
 
 .activity-block p {
@@ -382,19 +385,18 @@ hr {
 }
 
 .activity-block .center {
-
   font-size: .85em;
 }
 
 .activity-block .bold {
-  font-weight: 700;
+  font-weight: 300;
   font-style: normal;
-  font-family: Thunder;
-  font-size: 4em;
+  font-family: Inter;
+  /* Usar Inter */
+  font-size: 3em;
   margin-top: -.2em;
   padding: 0;
-  letter-spacing: -0.01em;
-
+  letter-spacing: -0.07em;
 }
 
 .cssbuttons-io {
@@ -402,9 +404,9 @@ hr {
   margin-bottom: -.2em;
   margin-left: .5em;
   border: none;
-  background: linear-gradient(to right, #f9a01bc8, #f9a01b);
+  background: linear-gradient(to right, #00ffbcc8, #00ffbc);
   /* Degradado */
-  color: #98002e;
+  color: black;
   /* Letras negras por defecto */
   overflow: hidden;
   transition: all 0.4s;
@@ -418,9 +420,11 @@ hr {
 .cssbuttons-io span {
   font-weight: 700;
   font-style: italic;
-  font-size: 2.5em;
-  font-family: Thunder;
-  padding: 3px 24px 0px 20px;
+  letter-spacing: -0.07em;
+  font-size: 2em;
+  font-family: Inter;
+  /* Usar Inter */
+  padding: 0px 24px 0px 20px;
   cursor: pointer;
 }
 
@@ -431,7 +435,7 @@ hr {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: white;
+  background-color: rgb(0, 0, 0);
   /* Fondo blanco por defecto */
   z-index: -1;
   /* Poner el degradado detrás del texto */
@@ -442,7 +446,7 @@ hr {
 }
 
 .cssbuttons-io:hover {
-  color: black;
+  color: rgb(255, 255, 255);
   /* Letras negras al hacer hover */
 }
 
@@ -454,10 +458,6 @@ hr {
 .cssbuttons-io span:active {
   transform: scale(0.95);
 }
-
-
-
-
 
 .activity-block .schedule {
   position: absolute;
@@ -475,8 +475,8 @@ hr {
   width: 100%;
   height: 200px;
   /* Increased the height of the fade */
-  background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #98002ed6, #98002e);
-  /* Gradient from transparent to #c1272d */
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0), #00ffbc);
+  /* Gradient from transparent to black */
   pointer-events: none;
   /* Ensure the fade doesn't interfere with scrolling */
 }
@@ -501,7 +501,6 @@ hr {
 .filtro {
   background-color: black;
   color: white;
-
   margin: 0 auto;
   /* Centra horizontalmente */
   max-width: 600px;
@@ -526,13 +525,15 @@ hr {
 .font-weight-bold {
   font-weight: bold;
 }
+
 /* Responsive design */
 @media (max-width: 1024px) {
   .container {
     flex-direction: column;
     align-items: stretch;
     background: none;
-    background-color: #98002e;
+    background-color: #00ffbc;
+    /* Asegura que el color de fondo se mantenga */
   }
 
   .titulo {
@@ -545,6 +546,7 @@ hr {
     font-size: 2em;
     text-align: center;
   }
+  
 
   .filters {
     position: relative;
@@ -573,19 +575,28 @@ hr {
     margin-left: 0;
     height: auto;
     box-sizing: border-box;
-    padding: 20px; /* Añadido: Espaciado para el contenido */
+    padding: 20px;
+    /* Añadido: Espaciado para el contenido */
   }
 
   .right-side {
-    padding: 0; /* Añadido:  Elimina padding interno */
+    padding: 0;
+    /* Añadido:  Elimina padding interno */
   }
 
   .activity-block {
-    width: 100%;  /* Ocupa todo el ancho disponible */
-    margin-right: 0; /* Elimina margen derecho */
-    margin-bottom: 20px; /* Restaura el margen inferior */
-    padding: 20px; /* Reduce el padding para que quepa en pantallas más pequeñas */
+    width: 100%;
+    /* Ocupa todo el ancho disponible */
+    margin-right: 0;
+    /* Elimina margen derecho */
+    margin-bottom: 20px;
+    /* Restaura el margen inferior */
+    padding: 20px;
+    /* Reduce el padding para que quepa en pantallas más pequeñas */
   }
+  .activity-block .bold {
+      font-size: 2em;
+    }
 
   .activity-block h2 {
     font-size: 3em;
@@ -595,29 +606,23 @@ hr {
     font-size: 1em;
   }
 
-  
-
-  
-
   .cssbuttons-io {
-    width: 100%; /*Boton ocupar todo el ancho*/
+    width: 100%;
+    /*Boton ocupar todo el ancho*/
     display: flex;
     justify-content: center;
   }
 
-  .cssbuttons-io span{
-    font-size: 1.8em; /*Bajar tamaño de fuente del boton*/
+  .cssbuttons-io span {
+    font-size: 1.5em;
+    /*Bajar tamaño de fuente del boton*/
   }
 
   /* Ajustes para pantallas aún más pequeñas (móviles) */
   @media (max-width: 576px) {
     .titulo h1 {
-      font-size: 2em; /* Aún más pequeño en móviles */
-    }
-
-
-    .activity-block .bold {
-      font-size: 2.5em;
+      font-size: 2em;
+      /* Aún más pequeño en móviles */
     }
   }
 }

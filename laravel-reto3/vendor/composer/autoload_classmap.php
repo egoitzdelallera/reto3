@@ -14,6 +14,7 @@ return array(
     'App\\Http\\Controllers\\MonitorController' => $baseDir . '/app/Http/Controllers/MonitorController.php',
     'App\\Http\\Controllers\\TiposActividadController' => $baseDir . '/app/Http/Controllers/TiposActividadController.php',
     'App\\Http\\Controllers\\UserController' => $baseDir . '/app/Http/Controllers/UserController.php',
+    'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Models\\Actividad' => $baseDir . '/app/Models/Actividad.php',
     'App\\Models\\ActividadesUsuario' => $baseDir . '/app/Models/ActividadesUsuario.php',
     'App\\Models\\CentroCivico' => $baseDir . '/app/Models/CentroCivico.php',

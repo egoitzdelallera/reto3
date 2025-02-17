@@ -32,6 +32,12 @@ const newItemDescription = ref("");
 const selectedTipoActividad = ref("");
 const selectedCentroCivico = ref("");
 const selectedMonitor = ref("");
+const newItemIdioma = ref("");
+const newItemEdadMin = ref("");
+const newItemEdadMax = ref("");
+const newItemFecha = ref("");
+const newItemHoraInicio = ref("");
+const newItemHoraFin = ref("");
 
 const newItemUbicacion = ref("");
 const newItemLatitud = ref("");
@@ -173,9 +179,15 @@ const confirmAddItem = async () => {
     newItem = {
       nombre: newItemName.value,
       descripcion: newItemDescription.value || "",
-      tipoActividad: selectedTipoActividad.value,
-      centroCivico: selectedCentroCivico.value,
-      monitor: selectedMonitor.value,
+      idioma: newItemIdioma.value || "", // Asegúrate de incluir el idioma si es necesario
+      edad_min: newItemEdadMin.value || null, // Asegúrate de enviar una edad mínima si es necesario
+      edad_max: newItemEdadMax.value || null, // Asegúrate de enviar una edad máxima si es necesario
+      id_centro_civico: selectedCentroCivico.value, // Aquí estamos enviando el ID del centro cívico
+      id_tipo_actividad: selectedTipoActividad.value, // Aquí estamos enviando el ID del tipo de actividad
+      id_monitor: selectedMonitor.value, // Aquí estamos enviando el ID del monitor
+      fecha: newItemFecha.value || "",  // La fecha seleccionada por el usuario
+      hora_inicio: newItemHoraInicio.value || "",  // La hora de inicio seleccionada
+      hora_fin: newItemHoraFin.value || "",  // La hora de fin seleccionada
     };
   } else if (currentSection.value === "centro_civico") {
     newItem = {
@@ -191,6 +203,9 @@ const confirmAddItem = async () => {
     errorMessage.value = "Sección no válida.";
     return;
   }
+
+  console.log('Datos enviados con newItem:', newItem);
+
 
   try {
     await api.post(`/${currentSection.value}`, newItem);
@@ -353,6 +368,23 @@ onMounted(() => {
                   placeholder="Descripción de la actividad"
                   rows="3"
                 ></textarea>
+                <input
+                  v-model="modifyingItem.idioma"
+                  class="form-control custom-input mb-3"
+                  placeholder="Idioma"
+                />
+                <input
+                  v-model="modifyingItem.edad_min"
+                  type="number"
+                  class="form-control custom-input mb-3"
+                  placeholder="Edad mínima"
+                />
+                <input
+                  v-model="modifyingItem.edad_max"
+                  type="number"
+                  class="form-control custom-input mb-3"
+                  placeholder="Edad máxima"
+                />
                 <select v-model="selectedTipoActividad" class="form-select custom-input mb-3">
                   <option value="" disabled selected>Seleccionar Tipo de Actividad</option>
                   <option v-for="tipo in tiposActividades" :key="tipo.id" :value="tipo.id">
@@ -420,6 +452,7 @@ onMounted(() => {
                 />
               </template>
 
+              <!-- Mostrar mensajes de error -->
               <div v-if="errorMessage" class="alert alert-danger mt-3">
                 {{ errorMessage }}
               </div>
@@ -435,6 +468,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
 
   
       <!-- Add Item Modal -->
@@ -453,6 +487,7 @@ onMounted(() => {
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+              <!-- Input general para el nombre del item -->
               <input
                 v-model="newItemName"
                 class="form-control custom-input mb-3"
@@ -510,6 +545,23 @@ onMounted(() => {
                   placeholder="Descripción de la actividad"
                   rows="3"
                 ></textarea>
+                <input
+                  v-model="newItemIdioma"
+                  class="form-control custom-input mb-3"
+                  placeholder="Idioma"
+                />
+                <input
+                  v-model="newItemEdadMin"
+                  type="number"
+                  class="form-control custom-input mb-3"
+                  placeholder="Edad mínima"
+                />
+                <input
+                  v-model="newItemEdadMax"
+                  type="number"
+                  class="form-control custom-input mb-3"
+                  placeholder="Edad máxima"
+                />
                 <select
                   v-model="selectedTipoActividad"
                   class="form-select custom-input mb-3"
@@ -549,6 +601,29 @@ onMounted(() => {
                     {{ monitor.nombre }}
                   </option>
                 </select>
+
+                <!-- Nuevos campos de fecha, hora inicio y hora fin -->
+                <input
+                  v-model="newItemFecha"
+                  type="date"
+                  class="form-control custom-input mb-3"
+                  placeholder="Fecha de la actividad"
+                  required
+                />
+                <input
+                  v-model="newItemHoraInicio"
+                  type="time"
+                  class="form-control custom-input mb-3"
+                  placeholder="Hora de inicio"
+                  required
+                />
+                <input
+                  v-model="newItemHoraFin"
+                  type="time"
+                  class="form-control custom-input mb-3"
+                  placeholder="Hora de fin"
+                  required
+                />
               </template>
 
               <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
