@@ -49,9 +49,12 @@ class UserController extends Controller
     {
         // Validación de los datos de entrada
         $validator = Validator::make($request->all(), [
+            'dni' => 'required|string|max:9',
             'nombre' => 'required|string|max:255',
             'correo' => 'required|string|email|max:255|unique:users,correo',
             'tipo' => 'required|string|max:50',
+            'sexo' => 'required|string|max:50',
+            'edad' => 'required|integer',
             'telefono' => 'nullable|string|max:15',
             'password' => 'required|string|min:6|confirmed'
         ]);
@@ -63,19 +66,25 @@ class UserController extends Controller
 
         // Crear el usuario
         $user = new User();
+        $user->dni = $request->input('dni');
         $user->nombre = $request->input('nombre');
         $user->correo = $request->input('correo');
         $user->tipo = $request->input('tipo');
+        $user->sexo = $request->input('sexo');
+        $user->edad = $request->input('edad');
         $user->telefono = $request->input('telefono');
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
         // Reclamos personalizados para el token
         $customClaims = [
+            'dni' => $user->dni,
             'id' => $user->id,
             'nombre' => $user->nombre,
             'correo' => $user->correo,
             'tipo' => $user->tipo,
+            'sexo' => $user->sexo,
+            'edad' => $user->edad,
             'telefono' => $user->telefono,
         ];
 

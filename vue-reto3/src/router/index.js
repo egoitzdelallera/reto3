@@ -5,6 +5,7 @@ import BoxeoView from '../views/BoxeoView.vue'
 import FutbolView from '../views/FutbolView.vue'
 import TenisView from '../views/TenisView.vue'
 import IniciarSesionComponent from '@/components/IniciarSesionComponent.vue'
+import IntranetComponent from '@/components/IntranetComponent.vue'
 
 const routes = [
   {
@@ -44,6 +45,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: IniciarSesionComponent,
+  },
+  {
+    path: '/intranet',
+    name: 'intranet',
+    component: IntranetComponent,
   }
 ]
 

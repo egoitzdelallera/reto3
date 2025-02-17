@@ -9,10 +9,10 @@ use App\Http\Controllers\TiposActividadController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware('auth:api');
 
 Route::post('/register', [UserController::class, 'register']);
-Route::post('/login', [UserController::class, 'login']);
+Route::post('/login', [UserController::class, 'login'])->name('login');
 Route::post('/logout', [UserController::class, 'logout'])->name('logout')->middleware('auth:api'); 
 Route::get('/user', [UserController::class, 'user'])->name('user')->middleware('auth:api'); 
 
@@ -31,13 +31,13 @@ Route::middleware('auth:api')->group(function () {
 });
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/centro-civico', [CentroCivicoController::class, 'index']);
-    Route::post('/centro-civico/crear', [CentroCivicoController::class, 'store']);
-    Route::put('/centro-civico/{id}', [CentroCivicoController::class, 'update']);
-    Route::delete('/centro-civico/{id}', [CentroCivicoController::class, 'destroy']);
+    Route::get('/centro_civico', [CentroCivicoController::class, 'index']);
+    Route::post('/centro_civico', [CentroCivicoController::class, 'store']);
+    Route::put('/centro_civico/{id}', [CentroCivicoController::class, 'update']);
+    Route::delete('/centro_civico/{id}', [CentroCivicoController::class, 'destroy']);
 });
 
 
 Route::controller(TiposActividadController::class)->group(function() {
-    Route::get('categorias', 'index'); 
+    Route::get('/categorias', 'index'); 
 });
