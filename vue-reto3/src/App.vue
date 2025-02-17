@@ -38,4 +38,4 @@ import FooterView from './views/FooterView.vue'
   width: 100%;
   height: 10%;
 }
-</style>
+</style>  
