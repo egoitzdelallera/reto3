@@ -43,7 +43,6 @@ class MonitorController extends Controller
 
         return response()->json(['message' => 'Monitor creado correctamente', 'data' => $monitor], 201);
 
-
     }
 
     /**
