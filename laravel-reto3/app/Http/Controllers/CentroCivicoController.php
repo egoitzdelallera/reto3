@@ -34,9 +34,9 @@ class CentroCivicoController extends Controller
             'ubicacion' => 'required|string|max:255',
             'longitud' => 'required|numeric',
             'latitud' => 'required|numeric',
-            'url' => 'required|string|max:255',
-            'telefono' => 'required|string|max:255',
-            'correo' => 'required|email|max:255',
+            'url' => 'nullable|string|max:255',
+            'telefono' => 'nullable|string|max:255',
+            'correo' => 'nullable|email|max:255',
         ]);
 
         if ($validator->fails()) {

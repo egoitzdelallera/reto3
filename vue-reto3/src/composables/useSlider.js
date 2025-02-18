@@ -1,7 +1,7 @@
 // composables/useSlider.js
 import { useRouter } from 'vue-router';
 import useCategorias from '../composables/useCategorias';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 
 const useSlider = () => {
   const router = useRouter();
@@ -19,7 +19,7 @@ const useSlider = () => {
       this.currentIndex = initialIndex; // Use the initial index, ajustado para mostrar slides a los lados
       this.isAnimating = false;
       this.autoplayInterval = null; // Store the interval ID
-      this.autoplayDelay = 3000; // Delay between slides in milliseconds
+      this.autoplayDelay = 2000; // Delay between slides in milliseconds
     }
 
     init() {
@@ -71,11 +71,11 @@ const useSlider = () => {
         slide.classList.toggle('active', normalizedIndex === this.currentIndex % this.images.length);
       });
 
-       // Set focus on the active slide
-       const activeSlide = slides[this.currentIndex % slides.length];
-       if (activeSlide) {
-         activeSlide.focus();
-       }
+      // Set focus on the active slide
+      const activeSlide = slides[this.currentIndex % slides.length];
+      if (activeSlide) {
+        activeSlide.focus();
+      }
     }
 
     normalizeIndex(index) {
@@ -153,7 +153,7 @@ const useSlider = () => {
 
       window.addEventListener('resize', () => this.positionSlides());
 
-       // Keyboard navigation
+      // Keyboard navigation
       this.container.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') {
           e.preventDefault(); // Prevent default scrolling
@@ -167,7 +167,7 @@ const useSlider = () => {
 
     smoothScroll(direction) {
       const targetIndex = this.currentIndex + direction;
-      const duration = 400; // Duration of the scroll animation in milliseconds
+      const duration = 300; // Duration of the scroll animation in milliseconds
       const start = this.currentIndex;
       const startTime = performance.now();
 
@@ -194,7 +194,21 @@ const useSlider = () => {
       return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
     }
 
-   
+    startAutoplay() {
+      if (this.autoplayInterval) {
+        clearInterval(this.autoplayInterval); // Clear existing interval
+      }
+      this.autoplayInterval = setInterval(() => {
+        this.moveSlides(1);
+      }, this.autoplayDelay);
+    }
+
+    stopAutoplay() {
+      if (this.autoplayInterval) {
+        clearInterval(this.autoplayInterval);
+        this.autoplayInterval = null;
+      }
+    }
   }
 
   const init = async () => {
@@ -212,9 +226,11 @@ const useSlider = () => {
       slider.init();
 
       // Give focus to the container element after the slider is initialized.
-      setTimeout(() => {
-        slider.container.focus();
-      }, 100);
+      nextTick(() => {
+        if (slider.container) {
+          slider.container.focus();
+        }
+      });
 
     } catch (e) {
       console.error("Error initializing slider:", e);

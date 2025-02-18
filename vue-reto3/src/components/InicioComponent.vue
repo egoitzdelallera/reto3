@@ -268,7 +268,7 @@ option {
   }
 
   /* Restringe a un máximo de 4 slides */
-  .slider > *:nth-child(n+5) {
+  .slider > *:nth-child(n+6) {
     display: none;
   }
 

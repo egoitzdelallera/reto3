@@ -1,5 +1,12 @@
 <template>
   <div class="container">
+    <InscriptionForm
+      v-if="showInscriptionModal"
+      :actividad="selectedActividad"
+      @inscription-success="handleInscriptionSuccess"
+      @inscription-error="handleInscriptionError"
+      @close="closeInscriptionModal"
+    />
     <div class="row d-flex align-items-center justify-content-around">
       <div class="col-12 col-md-4 titulo">
         <h1 class="ps-4">Actividades</h1>
@@ -90,7 +97,7 @@
                   <p class="center bold"> {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
                 </div>
                 <div class="col-4 col-md-4 d-flex justify-content-center align-items-center">
-                  <button class="cssbuttons-io">
+                  <button class="cssbuttons-io" @click="openInscriptionModal(actividad)">
                     <span>inscríbete</span>
                   </button>
                 </div>
@@ -105,11 +112,16 @@
 </template>
 
 <script>
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, watch, nextTick } from 'vue';
 import useActividades from '../composables/useActividades';
-import useCategorias from "../composables/useCategorias"
+import useCategorias from "../composables/useCategorias";
+import InscriptionForm from './InscriptionForm.vue';
+import { Modal } from 'bootstrap';
 
 export default {
+  components: {
+    InscriptionForm
+  },
   setup() {
     const { actividades, loading, error, fetchActividades, categoryId, setCategory } = useActividades();
     const { categorias, fetchCategorias } = useCategorias()
@@ -127,6 +139,11 @@ export default {
 
     // Local ref for the selected category
     const selectedCategoryId = ref(null);
+
+    // Refs para el modal y la actividad seleccionada
+    const inscriptionModal = ref(null);
+    const selectedActividad = ref(null);
+    const showInscriptionModal = ref(false); // Controla si se muestra el modal
 
     // Fetch centros civicos (replace with your actual data fetching)
     const centrosCivicos = ref([
@@ -268,7 +285,7 @@ export default {
 
     onMounted(async () => {
       await fetchCategorias();
-      const tenisCategory = categorias.value.find(category => category.id === 2);
+      const tenisCategory = categorias.value.find(cat => cat.nombre.toLowerCase() === 'tenis' || cat.nombre.toLowerCase() === 'Tenis');
       if (tenisCategory) {
         selectedCategoryId.value = tenisCategory.id;
         setCategory(tenisCategory.id);
@@ -328,6 +345,44 @@ export default {
       return deg * (Math.PI / 180)
     }
 
+        // Función para abrir el modal de inscripción
+    const openInscriptionModal = (actividad) => {
+      selectedActividad.value = actividad;
+      showInscriptionModal.value = true; // Muestra el modal
+
+      // Espera a que el DOM se actualice y luego inicializa el modal
+      nextTick(() => {
+        const inscriptionModalEl = document.getElementById('inscriptionModal');
+        if (inscriptionModalEl) {
+          inscriptionModal.value = new Modal(inscriptionModalEl);
+          inscriptionModal.value.show();
+        } else {
+          console.error('El elemento con ID "inscriptionModal" no se encontró en el DOM.');
+        }
+      });
+    };
+
+    // Función para manejar el éxito de la inscripción
+    const handleInscriptionSuccess = (data) => {
+      console.log("Inscripción exitosa en el componente padre:", data);
+      closeInscriptionModal();
+    };
+
+    // Función para manejar el error de la inscripción
+    const handleInscriptionError = (error) => {
+      console.error("Error en la inscripción en el componente padre:", error);
+      // Realizar acciones de manejo de errores
+    };
+
+    // Función para cerrar el modal
+    const closeInscriptionModal = () => {
+       if (inscriptionModal.value) {
+        inscriptionModal.value.hide(); // Cierra el modal de Bootstrap
+      }
+      showInscriptionModal.value = false; // Oculta el componente InscriptionForm
+      selectedActividad.value = null; // Limpia la actividad seleccionada
+    };
+
     return {
       actividades,
       loading,
@@ -348,7 +403,13 @@ export default {
       changeCategory,
        getLocation,
       userLatitude,
-      userLongitude
+      userLongitude,
+      openInscriptionModal,
+      selectedActividad,
+      handleInscriptionSuccess,
+      handleInscriptionError,
+      showInscriptionModal,
+      closeInscriptionModal
     };
   }
 };

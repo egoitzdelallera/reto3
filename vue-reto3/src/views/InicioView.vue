@@ -5,6 +5,5 @@ import InicioComponent from '../components/InicioComponent.vue'
 <template>
   <main>
       <InicioComponent />
-
   </main>
 </template>

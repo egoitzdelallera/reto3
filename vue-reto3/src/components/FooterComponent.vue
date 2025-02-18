@@ -6,11 +6,11 @@
         </div>
         <div class="footer__social">
           <a href="https://www.facebook.com" target="_blank">
-            <i class="bi bi-facebook"></i>          </a>
+            <i class="bi bi-facebook text-white"></i>          </a>
           <a href="https://www.instagram.com" target="_blank">
-            <i class="bi bi-instagram"></i>          </a>
+            <i class="bi bi-instagram text-white"></i>          </a>
           <a href="https://www.twitter.com" target="_blank">
-            <i class="bi bi-twitter-x"></i>
+            <i class="bi bi-twitter-x text-white"></i>
           </a>
         </div>
         <div class="footer__contact">
