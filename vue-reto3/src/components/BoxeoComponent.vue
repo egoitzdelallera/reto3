@@ -89,8 +89,10 @@
                     </span>
                     <span v-else>No Horarios</span>
                   </p>
+
                 </div>
                 <div class="col-3 col-md-3 px-0">
+
                   <p class="center" style="font-size: 1em;">Centro Cívico:</p>
                   <p class="center bold"> {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
                 </div>
@@ -122,11 +124,11 @@ export default {
   },
   setup() {
     const { actividades, loading, error, fetchActividades, categoryId, setCategory } = useActividades();
-    const { categorias, fetchCategorias } = useCategorias()
+    const { categorias, fetchCategorias } = useCategorias();
 
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
-      return categoria ? categoria.nombre.toUpperCase() : 'BOXEO';
+      return categoria ? categoria.nombre.toUpperCase() : 'boxeo';
     });
 
     // Local refs for filter selections
@@ -181,7 +183,7 @@ export default {
       }
 
       // Apply Idioma filter
-      if (selectedIdioma.value  && selectedIdioma.value !== 'all') {
+      if (selectedIdioma.value && selectedIdioma.value !== 'all') {
         if (selectedIdioma.value !== 'all') { // Check if a specific language is selected
           filtered = filtered.filter(actividad => {
             return actividad.idioma === selectedIdioma.value;
@@ -190,7 +192,7 @@ export default {
       }
 
       // Apply Horario filter
-      if (selectedHorario.value  && selectedHorario.value !== 'all') {
+      if (selectedHorario.value && selectedHorario.value !== 'all') {
         if (selectedHorario.value !== 'all') {
           filtered = filtered.filter(actividad => {
             if (!actividad.horarios || actividad.horarios.length === 0) {
@@ -216,7 +218,7 @@ export default {
       return filtered;
     });
 
-     const filteredAndSortedActividades = computed(() => {
+    const filteredAndSortedActividades = computed(() => {
       let filtered = [...filteredActividades.value];
       if (selectedCentroCivico.value === 'ubicacion' && userLatitude.value && userLongitude.value) {
         // Sort by distance
@@ -244,38 +246,38 @@ export default {
       // will automatically recalculate when the filter refs change.
     };
 
-     const handleCentroCivicoChange = () => {
+    const handleCentroCivicoChange = () => {
       if (selectedCentroCivico.value === 'ubicacion') {
-        getLocation()
+        getLocation();
       } else {
-        applyFilters()
+        applyFilters();
       }
-    }
+    };
 
     const getLocation = () => {
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            userLatitude.value = position.coords.latitude
-            userLongitude.value = position.coords.longitude
+            userLatitude.value = position.coords.latitude;
+            userLongitude.value = position.coords.longitude;
 
             // Guardar en localStorage
-            localStorage.setItem('userLatitude', userLatitude.value)
-            localStorage.setItem('userLongitude', userLongitude.value)
+            localStorage.setItem('userLatitude', userLatitude.value);
+            localStorage.setItem('userLongitude', userLongitude.value);
 
-            console.log(`Ubicación obtenida: Latitud ${userLatitude.value}, Longitud ${userLongitude.value}`)
+            console.log(`Ubicación obtenida: Latitud ${userLatitude.value}, Longitud ${userLongitude.value}`);
           },
           (error) => {
-            console.error("Error obteniendo ubicación:", error)
-            alert("No se pudo obtener la ubicación")
-            selectedCentroCivico.value = '' // Resetear la selección
+            console.error("Error obteniendo ubicación:", error);
+            alert("No se pudo obtener la ubicación");
+            selectedCentroCivico.value = ''; // Resetear la selección
           }
-        )
+        );
       } else {
-        alert("Tu navegador no soporta geolocalización")
-        selectedCentroCivico.value = '' // Resetear la selección
+        alert("Tu navegador no soporta geolocalización");
+        selectedCentroCivico.value = ''; // Resetear la selección
       }
-    }
+    };
 
     const changeCategory = async () => {
       setCategory(selectedCategoryId.value);
@@ -289,19 +291,20 @@ export default {
       const boxeoCategory = categorias.value.find(cat => cat.nombre.toLowerCase() === 'boxeo' || cat.nombre.toLowerCase() === 'Boxeo');
 
       if (boxeoCategory) {
-        selectedCategoryId.value = boxeoCategory.id;  // Set initial selection to basket category
+        selectedCategoryId.value = boxeoCategory.id;  // Set initial selection to the boxeo category ID
         setCategory(boxeoCategory.id);             // Set the category in the composable
-        await fetchActividades();                   // Fetch the basket activities
+        await fetchActividades();                   // Fetch the boxeo activities
       } else {
         console.warn("Boxeo category not found.  Loading first category instead.");
-        // Fallback: load the first category if basket isn't found
+        // Fallback: load the first category if boxeo isn't found
         if (categorias.value && categorias.value.length > 0) {
           selectedCategoryId.value = categorias.value[0].id;
           setCategory(categorias.value[0].id);
           await fetchActividades();
         }
       }
- //Try to get the location from localStorage on component mount
+
+      // Try to get the location from localStorage on component mount
       const storedLat = localStorage.getItem('userLatitude');
       const storedLng = localStorage.getItem('userLongitude');
 
@@ -398,7 +401,7 @@ export default {
       selectedIdioma,
       selectedHorario,
       filteredActividades,
-      filteredAndSortedActividades,
+      filteredAndSortedActividades, // Now accessible in the template
       applyFilters,
       handleCentroCivicoChange,
       categories: computed(() => categorias.value),

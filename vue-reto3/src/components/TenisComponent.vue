@@ -26,7 +26,7 @@
             <option v-for="centro in centrosCivicos" :key="centro.id" :value="centro.id">
               {{ centro.nombre }}
             </option>
-             <option value="ubicacion">Filtrar por ubicación</option>
+            <option value="ubicacion">Filtrar por ubicación</option>
           </select>
           <select id="edad" v-model="selectedEdad" @change="applyFilters" :class="{ 'font-weight-bold': selectedEdad }">
             <option value="" disabled selected hidden>Edad</option>
@@ -123,12 +123,14 @@ export default {
     InscriptionForm
   },
   setup() {
+    // ------------------- Composables -------------------
     const { actividades, loading, error, fetchActividades, categoryId, setCategory } = useActividades();
     const { categorias, fetchCategorias } = useCategorias()
 
+    // ------------------- Computed Properties -------------------
     const categoriaNombre = computed(() => {
       const categoria = categorias.value.find(cat => cat.id === categoryId.value);
-      return categoria ? categoria.nombre.toUpperCase() : 'TENIS';
+      return categoria ? categoria.nombre.toUpperCase() : 'TENIS'; // Default to 'TENIS'
     });
 
     // Local refs for filter selections
@@ -160,7 +162,7 @@ export default {
     const filteredActividades = computed(() => {
       let filtered = [...actividades.value];
 
-     // Apply Centro Civico filter
+      // Apply Centro Civico filter
       if (selectedCentroCivico.value) {
         if (selectedCentroCivico.value === 'all') {
           // Do nothing, show all centers
@@ -182,7 +184,7 @@ export default {
       }
 
       // Apply Idioma filter
-      if (selectedIdioma.value  && selectedIdioma.value !== 'all') {
+      if (selectedIdioma.value && selectedIdioma.value !== 'all') {
         if (selectedIdioma.value !== 'all') { // Check if a specific language is selected
           filtered = filtered.filter(actividad => {
             return actividad.idioma === selectedIdioma.value;
@@ -191,7 +193,7 @@ export default {
       }
 
       // Apply Horario filter
-      if (selectedHorario.value  && selectedHorario.value !== 'all') {
+      if (selectedHorario.value && selectedHorario.value !== 'all') {
         if (selectedHorario.value !== 'all') {
           filtered = filtered.filter(actividad => {
             if (!actividad.horarios || actividad.horarios.length === 0) {
@@ -240,12 +242,31 @@ export default {
       return filtered;
     });
 
+    // ------------------- Refs -------------------
+    const selectedCentroCivico = ref('');
+    const selectedEdad = ref('');
+    const selectedIdioma = ref('');
+    const selectedHorario = ref('');
+    const selectedCategoryId = ref(null); // Local ref for the selected category
+
+    const centrosCivicos = ref([
+      { id: 1, nombre: 'Ibaiondo' },
+      { id: 2, nombre: 'Aldabe' },
+      { id: 3, nombre: 'El Pilar' },
+      { id: 4, nombre: 'Arriaga' },
+      { id: 5, nombre: 'Salburua' }
+    ]);
+
+    const userLatitude = ref(null);
+    const userLongitude = ref(null);
+
+    // ------------------- Methods -------------------
     const applyFilters = () => {
       // No need to do anything here. The `filteredActividades` computed property
       // will automatically recalculate when the filter refs change.
     };
 
-     const handleCentroCivicoChange = () => {
+    const handleCentroCivicoChange = () => {
       if (selectedCentroCivico.value === 'ubicacion') {
         getLocation()
       } else {
@@ -283,6 +304,7 @@ export default {
       await fetchActividades(); // Re-fetch activities for the new category
     };
 
+    // ------------------- Lifecycle Hooks -------------------
     onMounted(async () => {
       await fetchCategorias();
       const tenisCategory = categorias.value.find(cat => cat.nombre.toLowerCase() === 'tenis' || cat.nombre.toLowerCase() === 'Tenis');
@@ -291,15 +313,15 @@ export default {
         setCategory(tenisCategory.id);
         await fetchActividades();
       } else {
-        console.warn("Tenis category not found. Loading first category instead.");
-
+        console.warn("Tenis category not found.  Loading first category instead.");
+        // If basket also not found, load the first available category as a fallback
         if (categorias.value && categorias.value.length > 0) {
           selectedCategoryId.value = categorias.value[0].id;
           setCategory(categorias.value[0].id);
           await fetchActividades();
         }
       }
-            //Try to get the location from localStorage on component mount
+      //Try to get the location from localStorage on component mount
       const storedLat = localStorage.getItem('userLatitude');
       const storedLng = localStorage.getItem('userLongitude');
 
@@ -309,14 +331,13 @@ export default {
       }
     });
 
-    // Helper function to get the day of the week
+    // ------------------- Helper Functions -------------------
     const getDayOfWeek = (dateString) => {
       const date = new Date(dateString);
       const daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       return daysOfWeek[date.getDay()];
     };
 
-    // Helper function to format date, day of week, and time
     const formatDateTime = (dateString, startTime, endTime) => {
       const date = new Date(dateString);
       const dayOfWeek = getDayOfWeek(dateString);
@@ -326,7 +347,7 @@ export default {
 
       return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
     };
-     // Helper function to calculate distance between two coordinates (Haversine formula)
+    // Helper function to calculate distance between two coordinates (Haversine formula)
     function calculateDistance(lat1, lon1, lat2, lon2) {
       const R = 6371; // Radius of the earth in km
       const dLat = deg2rad(lat2 - lat1);
@@ -395,13 +416,13 @@ export default {
       selectedIdioma,
       selectedHorario,
       filteredActividades,
-        filteredAndSortedActividades,
+      filteredAndSortedActividades,
       applyFilters,
-       handleCentroCivicoChange,
+      handleCentroCivicoChange,
       categories: computed(() => categorias.value),
       selectedCategoryId,
       changeCategory,
-       getLocation,
+      getLocation,
       userLatitude,
       userLongitude,
       openInscriptionModal,
@@ -562,7 +583,7 @@ hr {
   /* Letras negras por defecto */
   overflow: hidden;
   transition: all 0.4s;
-  /* Transición para todas las propiedades */
+  /* Transición para todas las properties */
   position: relative;
   z-index: 10;
   display: inline-flex;
@@ -590,7 +611,7 @@ hr {
   z-index: -1;
   /* Poner el degradado detrás del texto */
   transform: translateX(-100%);
-  /* Ocultar el degradado inicialmente */
+  /* Ocultar el degradado initially */
   transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
   /* Transición para la animación */
 }

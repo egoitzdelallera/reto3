@@ -116,6 +116,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import { computed, ref, onMounted, nextTick } from 'vue';
 import useActividades from '../composables/useActividades';
 import useCategorias from "../composables/useCategorias";
@@ -340,6 +341,26 @@ export default {
       return distance;
     }
 
+    // Función para enviar correo electrónico usando Mailgun
+    const sendConfirmationEmail = async (email, actividad) => {
+      try {
+        const response = await axios.post('https://api.mailgun.net/v3/YOUR_DOMAIN_NAME/messages', {
+          from: 'Excited User <mailgun@YOUR_DOMAIN_NAME>',
+          to: email,
+          subject: 'Inscripción Exitosa',
+          text: `Te has inscrito con éxito en la actividad: ${actividad.nombre}`
+        }, {
+          auth: {
+            username: 'api',
+            password: 'YOUR_API_KEY'
+          }
+        });
+        console.log('Correo enviado:', response.data);
+      } catch (error) {
+        console.error('Error enviando correo:', error);
+      }
+    };
+
     // Función para abrir el modal de inscripción
     const openInscriptionModal = (actividad) => {
       selectedActividad.value = actividad;
@@ -360,6 +381,7 @@ export default {
     // Función para manejar el éxito de la inscripción
     const handleInscriptionSuccess = (data) => {
       console.log("Inscripción exitosa en el componente padre:", data);
+      sendConfirmationEmail(data.email, selectedActividad.value); // Enviar correo de confirmación
       closeInscriptionModal();
     };
 
