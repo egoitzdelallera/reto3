@@ -38,6 +38,7 @@ const newItemEdadMax = ref("");
 const newItemFecha = ref("");
 const newItemHoraInicio = ref("");
 const newItemHoraFin = ref("");
+const newItemMultimedia = ref("");
 
 const newItemUbicacion = ref("");
 const newItemLatitud = ref("");
@@ -101,7 +102,7 @@ const fetchMonitores = async () => {
 
 const fetchTiposActividades = async () => {
   try {
-    const response = await api.get("/categorias");
+    const response = await api.get("/tipos_actividades");
     tiposActividades.value = response.data;
   } catch (error) {
     console.error("Error al cargar tipos de actividades:", error);
@@ -153,18 +154,30 @@ const saveModification = async () => {
     errorMessage.value = "El nombre no puede estar vacío.";
     return;
   }
+
   try {
     await api.put(`/${currentSection.value}/${modifyingItem.value.id}`, modifyingItem.value);
+    console.log("Modificación guardada:", modifyingItem.value);
+    console.log("Sección actual:", currentSection.value);
+
+    // Actualizar la lista según la sección
     if (currentSection.value === "centro_civico") {
       fetchCentrosCivicos();
-    } else {
+    } else if (currentSection.value === "actividades") {
       fetchActividades();
+    } else if (currentSection.value === "tipos_actividades") {
+      fetchTiposActividades(); // Asegúrate de tener esta función en tu código
     }
-    modifyModal.value.hide();
+
+    // Cerrar el modal después de guardar los cambios
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modifyModal"));
+    if (modal) modal.hide();
+    
   } catch (error) {
     errorMessage.value = error.message || "Error al guardar los cambios.";
   }
 };
+
 
 // Añadir nuevo item
 const confirmAddItem = async () => {
@@ -179,15 +192,15 @@ const confirmAddItem = async () => {
     newItem = {
       nombre: newItemName.value,
       descripcion: newItemDescription.value || "",
-      idioma: newItemIdioma.value || "", // Asegúrate de incluir el idioma si es necesario
-      edad_min: newItemEdadMin.value || null, // Asegúrate de enviar una edad mínima si es necesario
-      edad_max: newItemEdadMax.value || null, // Asegúrate de enviar una edad máxima si es necesario
-      id_centro_civico: selectedCentroCivico.value, // Aquí estamos enviando el ID del centro cívico
-      id_tipo_actividad: selectedTipoActividad.value, // Aquí estamos enviando el ID del tipo de actividad
-      id_monitor: selectedMonitor.value, // Aquí estamos enviando el ID del monitor
-      fecha: newItemFecha.value || "",  // La fecha seleccionada por el usuario
-      hora_inicio: newItemHoraInicio.value || "",  // La hora de inicio seleccionada
-      hora_fin: newItemHoraFin.value || "",  // La hora de fin seleccionada
+      idioma: newItemIdioma.value || "",
+      edad_min: newItemEdadMin.value || null,
+      edad_max: newItemEdadMax.value || null,
+      id_centro_civico: selectedCentroCivico.value,
+      id_tipo_actividad: selectedTipoActividad.value,
+      id_monitor: selectedMonitor.value,
+      fecha: newItemFecha.value || "",
+      hora_inicio: newItemHoraInicio.value || "",
+      hora_fin: newItemHoraFin.value || "",
     };
   } else if (currentSection.value === "centro_civico") {
     newItem = {
@@ -199,26 +212,34 @@ const confirmAddItem = async () => {
       telefono: newItemTelefono.value || "",
       correo: newItemCorreo.value || "",
     };
+  } else if (currentSection.value === "tipos_actividades") {
+    newItem = {
+      nombre: newItemName.value,
+      descripcion: newItemDescription.value || "",
+      multimedia: newItemMultimedia.value || "", // URL o enlace del recurso multimedia
+    };
   } else {
     errorMessage.value = "Sección no válida.";
     return;
   }
 
-  console.log('Datos enviados con newItem:', newItem);
-
+  console.log("Datos enviados con newItem:", newItem);
 
   try {
     await api.post(`/${currentSection.value}`, newItem);
+
     if (currentSection.value === "centro_civico") {
       fetchCentrosCivicos();
-    } else {
+    } else if (currentSection.value === "actividades") {
       fetchActividades();
+    } else if (currentSection.value === "tipos_actividades") {
+      fetchTiposActividades(); // Agregamos la función para refrescar la lista
     }
-    addItemModal.value.hide();
   } catch (error) {
     errorMessage.value = error.message || "Error al añadir el nuevo ítem.";
   }
 };
+
 
 // Cargar datos al montar el componente
 onMounted(() => {
@@ -324,7 +345,7 @@ onMounted(() => {
       </div>
 
       <!-- Tipos de Actividades Section -->
-      <div class="col">
+      <div class="col my-2">
         <div class="card custom-card h-100">
           <div class="card-header custom-card-header d-flex align-items-center">
             <h5 class="card-title mb-0 text-dark me-auto">Tipos de Actividades</h5>
@@ -347,7 +368,7 @@ onMounted(() => {
             <div v-else-if="tiposActividadesError" class="alert alert-danger">{{ tiposActividadesError }}</div>
             <ul v-else class="list-group list-group-flush">
               <li
-                v-for="tipo in displayedTiposActividades"
+                v-for="tipo in tiposActividades"
                 :key="tipo.id"
                 class="list-group-item d-flex justify-content-between align-items-center custom-list-item"
               >
@@ -395,9 +416,9 @@ onMounted(() => {
               ></button>
             </div>
             <div class="modal-body">
-              <!-- Para cualquier sección excepto 'actividades' y 'centro_civico' -->
+              <!-- Para cualquier sección excepto 'actividades', 'centro_civico' y 'tipos_actividades' -->
               <input
-                v-if="currentSection !== 'actividades' && currentSection !== 'centro_civico' && modifyingItem"
+                v-if="currentSection !== 'actividades' && currentSection !== 'centro_civico' && currentSection !== 'tipos_actividades' && modifyingItem"
                 v-model="modifyingItem.nombre"
                 class="form-control custom-input"
                 placeholder="Nombre del ítem"
@@ -501,6 +522,27 @@ onMounted(() => {
                 />
               </template>
 
+              <!-- Modificar Tipos de Actividades -->
+              <template v-if="currentSection === 'tipos_actividades'">
+                <input
+                  v-if="modifyingItem"
+                  v-model="modifyingItem.nombre"
+                  class="form-control custom-input mb-3"
+                  placeholder="Nombre del tipo de actividad"
+                />
+                <textarea
+                  v-model="modifyingItem.descripcion"
+                  class="form-control custom-input mb-3"
+                  placeholder="Descripción del tipo de actividad"
+                  rows="3"
+                ></textarea>
+                <input
+                  v-model="modifyingItem.multimedia"
+                  class="form-control custom-input mb-3"
+                  placeholder="URL del archivo multimedia"
+                />
+              </template>
+
               <!-- Mostrar mensajes de error -->
               <div v-if="errorMessage" class="alert alert-danger mt-3">
                 {{ errorMessage }}
@@ -517,6 +559,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
 
 
   
@@ -571,18 +614,18 @@ onMounted(() => {
                 <input
                   v-model="newItemUrl"
                   class="form-control custom-input mb-3"
-                  placeholder="URL (opcional)"
+                  placeholder="URL"
                 />
                 <input
                   v-model="newItemTelefono"
                   class="form-control custom-input mb-3"
-                  placeholder="Teléfono (opcional)"
+                  placeholder="Teléfono"
                 />
                 <input
                   v-model="newItemCorreo"
                   type="email"
                   class="form-control custom-input mb-3"
-                  placeholder="Correo Electrónico (opcional)"
+                  placeholder="Correo Electrónico"
                 />
               </template>
 
@@ -672,6 +715,21 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Hora de fin"
                   required
+                />
+              </template>
+
+              <!-- Inputs para Tipos de Actividades -->
+              <template v-if="currentSection === 'tipos_actividades'">
+                <textarea
+                  v-model="newItemDescription"
+                  class="form-control custom-input mb-3"
+                  placeholder="Descripción del tipo de actividad"
+                  rows="3"
+                ></textarea>
+                <input
+                  v-model="newItemMultimedia"
+                  class="form-control custom-input mb-3"
+                  placeholder="URL del archivo multimedia"
                 />
               </template>
 

@@ -21,7 +21,34 @@ class UserController extends Controller
 {
     public function login(Request $request)
     {
-        // ... your login logic here ...
+        // Validar las credenciales
+        $credentials = $request->validate([
+            'correo' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        // Intentar autenticar con las credenciales
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['message' => 'Correo o contraseña inválidos'], 401);
+        }
+
+        // Obtener el usuario autenticado
+        $user = auth()->user();
+
+        // Definir los claims personalizados
+        $customClaims = [
+            'id' => $user->id,
+            'nombre' => $user->nombre,
+            'correo' => $user->correo,
+            'tipo' => $user->tipo,
+            'telefono' => $user->telefono,
+        ];
+
+        // Generar el token con los claims personalizados
+        $token = JWTAuth::fromUser($user, $customClaims);
+
+        // Devolver el token junto con el tipo
+        return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
     }
 
     public function inscribir(Request $request)
