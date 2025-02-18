@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Jobs\SendInscriptionEmail;
 use Validator;
 use Illuminate\Support\Facades\Auth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 

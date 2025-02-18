@@ -322,6 +322,55 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <!-- Tipos de Actividades Section -->
+      <div class="col">
+        <div class="card custom-card h-100">
+          <div class="card-header custom-card-header d-flex align-items-center">
+            <h5 class="card-title mb-0 text-dark me-auto">Tipos de Actividades</h5>
+            <button @click="showAddItemPopup('tipos_actividades')" class="btn btn-sm btn-secondary bg-info w-25">
+              <i class="bi bi-plus-lg"></i> Añadir
+            </button>
+          </div>
+          <div class="card-body">
+            <input
+              v-model="searchQueryTipos"
+              type="text"
+              class="form-control mb-3 custom-input"
+              placeholder="Buscar tipo de actividad por nombre"
+            />
+            <div v-if="tiposActividadesLoading" class="text-center">
+              <div class="spinner-border text-secondary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+            <div v-else-if="tiposActividadesError" class="alert alert-danger">{{ tiposActividadesError }}</div>
+            <ul v-else class="list-group list-group-flush">
+              <li
+                v-for="tipo in displayedTiposActividades"
+                :key="tipo.id"
+                class="list-group-item d-flex justify-content-between align-items-center custom-list-item"
+              >
+                <span class="text-dark">{{ tipo.nombre }}</span>
+                <div>
+                  <button @click="showModifyPopup(tipo, 'tipos_actividades')" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                </div>
+              </li>
+            </ul>
+            <div v-if="tiposActividades.length > 6" class="d-flex justify-content-center">
+              <button
+                @click="toggleShowAllTiposActividades"
+                class="btn btn-link btn-sm mt-2 text-secondary custom-show-more-btn"
+              >
+                {{ showAllTiposActividades ? 'Mostrar menos' : 'Mostrar más' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
   
       <!-- Modify Modal -->
       <div
