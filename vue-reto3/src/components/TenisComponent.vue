@@ -1121,7 +1121,7 @@ font-size: 2em;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it's on top of everything */
+    z-index: 9999; /* Ensure it's on top of everything */
 }
 
 .modal-content {

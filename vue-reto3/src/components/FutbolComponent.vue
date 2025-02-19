@@ -444,7 +444,7 @@ export default {
         showInscriptionModal.value = true;
 
         nextTick(() => {
-            const inscriptionModalEl = document.querySelector('#inscriptionForm');
+          const inscriptionModalEl = document.getElementById('inscriptionModal');
 
             if (inscriptionModalEl) {
                 inscriptionModal.value = new Modal(inscriptionModalEl);
@@ -949,7 +949,7 @@ hr {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it's on top of everything */
+    z-index: 9999; /* Ensure it's on top of everything */
 }
 
 .modal-content {
