@@ -28,6 +28,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/actividades', [ActividadController::class, 'store']);
     Route::put('/actividades/{id}', [ActividadController::class, 'update']);
     Route::delete('/actividades/{id}', [ActividadController::class, 'destroy']);
+    Route::get('/actividades/{id}/usuarios', [ActividadController::class, 'getUsuariosInscritos']);
+
 });
 
 Route::controller(TiposActividadController::class)->group(function() {

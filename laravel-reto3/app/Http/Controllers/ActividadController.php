@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Actividad;
+use App\Models\User;
 use Validator;
 use App\Models\Horario;
+use Illuminate\Support\Facades\DB;
 
 class ActividadController extends Controller
 {
@@ -154,5 +156,26 @@ class ActividadController extends Controller
         $actividad->delete();
 
         return response()->json(['message' => 'Actividad eliminada correctamente'], 200);
+    }
+    public function getUsuariosInscritos($id)
+    {
+        try {
+            // Consulta a la base de datos para obtener los usuarios inscritos en la actividad
+            // ASUMIENDO que tienes una tabla pivote llamada actividades_usuarios
+            $usuarios = DB::table('users')
+                ->join('actividades_usuarios', 'users.id', '=', 'actividades_usuarios.id_usuario')
+                ->where('actividades_usuarios.id_actividad', $id)
+                ->select('users.*') // Selecciona toda la información del usuario
+                ->get();
+
+            if ($usuarios->isEmpty()) {
+                return response()->json(['message' => 'No hay usuarios inscritos en esta actividad.'], 200); // No es un error, simplemente no hay datos
+            }
+
+            return response()->json($usuarios, 200); // Devuelve la lista de usuarios
+        } catch (\Exception $e) {
+            // Manejo de errores
+            return response()->json(['message' => 'Error al obtener los usuarios inscritos.', 'error' => $e->getMessage()], 500);
+        }
     }
 }
