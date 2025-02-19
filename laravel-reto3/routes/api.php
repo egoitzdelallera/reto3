@@ -33,6 +33,13 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/actividades/{id}', [ActividadController::class, 'destroy']);
 });
 
+Route::controller(TiposActividadController::class)->group(function() {
+    Route::get('categorias', 'index');
+    Route::get('tipos_actividades', 'index');
+    Route::post('tipos_actividades', 'store');
+    Route::put('tipos_actividades/{id}', 'update');
+});
+
 Route::middleware('auth:api')->group(function () {
     Route::get('/centro_civico', [CentroCivicoController::class, 'index']);
     Route::post('/centro_civico', [CentroCivicoController::class, 'store']);

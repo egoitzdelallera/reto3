@@ -9,6 +9,28 @@
       @close="closeInscriptionModal"
     />
 
+    <!-- Custom Modals -->
+    <div v-if="showLocationModal" class="modal">
+      <div class="modal-content">
+        <h3>¿Permitir acceso a tu ubicación?</h3>
+        <p>Necesitamos tu ubicación para mostrar las actividades más cercanas.</p>
+        <div class="modal-buttons">
+          <button @click="handleAllowLocation">Permitir</button>
+          <button @click="handleDenyLocation">Denegar</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showLocationExplanation" class="modal">
+      <div class="modal-content">
+        <h3>Permisos de ubicación desactivados</h3>
+        <p>Por favor activa los permisos de ubicación en la configuración de tu navegador para utilizar esta función.</p>
+        <div class="modal-buttons">
+          <button @click="closeExplanation">Entendido</button>
+        </div>
+      </div>
+    </div>
+
     <div class="row d-flex align-items-center justify-content-around">
       <div class="col-12 col-md-4 titulo">
         <h1 class="ps-4">Actividades</h1>
@@ -99,11 +121,29 @@
 
                   <p class="center" style="font-size: 1em;">Centro Cívico:</p>
                   <p class="center bold"> {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
+
+                  <p v-if="userLatitude && userLongitude && actividad.centro_civico">
+                    Distancia: {{ calculateDistanceToCentroCivico(actividad.centro_civico.latitud, actividad.centro_civico.longitud) }} km
+                  </p>
+                  
                 </div>
                 <div class="col-4 col-md-4 d-flex justify-content-center align-items-center">
-                  <button class="cssbuttons-io" @click="openInscriptionModal(actividad)">
+                  <div class="row">
+                    <div class="col-12">
+                      <button
+                    v-if="actividad.centro_civico"
+                    @click="handleGetDirections(actividad.centro_civico.latitud, actividad.centro_civico.longitud)"
+                    class=" cssbuttons-io2">
+                    <span>Cómo llegar</span> 
+                  </button>
+                    </div>
+                    <div class="col-12">
+                      <button class="cssbuttons-io" @click="openInscriptionModal(actividad)">
                     <span>¡Inscríbete!</span>
                   </button>
+                    </div>
+                  </div>
+                  
                 </div>
               </div>
             </div>
@@ -144,7 +184,11 @@ export default {
     // Refs para el modal y la actividad seleccionada
     const inscriptionModal = ref(null);
     const selectedActividad = ref(null);
-    const showInscriptionModal = ref(false); // Controla si se muestra el modal
+    const showInscriptionModal = ref(false);
+
+    //Refs for location modals
+    const showLocationModal = ref(false);
+    const showLocationExplanation = ref(false);
 
     const centrosCivicos = ref([
       { id: 1, nombre: 'Ibaiondo' },
@@ -244,13 +288,27 @@ export default {
       // No need to do anything here. The `filteredActividades` computed property
       // will automatically recalculate when the filter refs change.
     };
+
     const handleCentroCivicoChange = () => {
       if (selectedCentroCivico.value === 'ubicacion') {
-        getLocation()
+          showLocationModal.value = true;
       } else {
-        applyFilters()
+        applyFilters();
       }
-    }
+    };
+    const handleAllowLocation = () => {
+        showLocationModal.value = false;
+        getLocation();
+    };
+
+    const handleDenyLocation = () => {
+        showLocationModal.value = false;
+        selectedCentroCivico.value = '';
+    };
+    const closeExplanation = () => {
+        showLocationExplanation.value = false;
+        selectedCentroCivico.value = '';
+    };
 
     const getLocation = () => {
       if ("geolocation" in navigator) {
@@ -265,18 +323,22 @@ export default {
 
             console.log(`Ubicación obtenida: Latitud ${userLatitude.value}, Longitud ${userLongitude.value}`)
           },
-          (error) => {
-            console.error("Error obteniendo ubicación:", error)
-            alert("No se pudo obtener la ubicación")
-            selectedCentroCivico.value = '' // Resetear la selección
-          }
+           (error) => {
+                console.error('Error obteniendo ubicación:', error);
+                // Check if the error is due to denied permission.
+                if (error.code === error.PERMISSION_DENIED) {
+                    showLocationExplanation.value = true;
+                } else {
+                    alert('No se pudo obtener la ubicación');
+                    selectedCentroCivico.value = ''; // Resetear la selección
+                }
+            }
         )
       } else {
         alert("Tu navegador no soporta geolocalización")
         selectedCentroCivico.value = '' // Resetear la selección
       }
     }
-
 
     const changeCategory = async () => {
       setCategory(selectedCategoryId.value);
@@ -326,58 +388,86 @@ export default {
       return `${dayOfWeek}, ${formattedStartTime} - ${formattedEndTime}`;
     };
      // Helper function to calculate distance between two coordinates (Haversine formula)
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Radius of the earth in km
-      const dLat = deg2rad(lat2 - lat1);
-      const dLon = deg2rad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        ;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c; // Distance in km
-      return distance;
+      function calculateDistance(lat1, lon1, lat2, lon2) {
+          const R = 6371; // Radius of the earth in km
+          const dLat = deg2rad(lat2 - lat1);
+          const dLon = deg2rad(lon2 - lon1);
+          const a =
+              Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          const distance = R * c; // Distance in km
+          return distance;
+      }
+
+    function deg2rad(deg) {
+      return deg * (Math.PI / 180)
     }
 
-    // Función para abrir el modal de inscripción
-    const openInscriptionModal = (actividad) => {
-      selectedActividad.value = actividad;
-      showInscriptionModal.value = true; // Muestra el modal
-
-      // Espera a que el DOM se actualice y luego inicializa el modal
-      nextTick(() => {
-        const inscriptionModalEl = document.getElementById('inscriptionModal');
-        if (inscriptionModalEl) {
-          inscriptionModal.value = new Modal(inscriptionModalEl);
-          inscriptionModal.value.show();
-        } else {
-          console.error('El elemento con ID "inscriptionModal" no se encontró en el DOM.');
-        }
-      });
-    };
-
-    // Función para manejar el éxito de la inscripción
-    const handleInscriptionSuccess = (data) => {
-      console.log("Inscripción exitosa en el componente padre:", data);
-      closeInscriptionModal();
-    };
-
-    // Función para manejar el error de la inscripción
-    const handleInscriptionError = (error) => {
-      console.error("Error en la inscripción en el componente padre:", error);
-      // Realizar acciones de manejo de errores
-    };
-
-    // Función para cerrar el modal
-    const closeInscriptionModal = () => {
-       if (inscriptionModal.value) {
-        inscriptionModal.value.hide(); // Cierra el modal de Bootstrap
+    const calculateDistanceToCentroCivico = (centroCivicoLat, centroCivicoLon) => {
+      if (userLatitude.value !== null && userLongitude.value !== null && centroCivicoLat && centroCivicoLon) {
+        const distance = calculateDistance(
+          userLatitude.value,
+          userLongitude.value,
+          centroCivicoLat,
+          centroCivicoLon
+        );
+        return distance.toFixed(2); // Retornar la distancia con dos decimales
+      } else {
+        return 'N/A'; // Retornar 'N/A' si las coordenadas no están disponibles
       }
-      showInscriptionModal.value = false; // Oculta el componente InscriptionForm
-      selectedActividad.value = null; // Limpia la actividad seleccionada
     };
+    // Function to open Google Maps with directions
+      const openGoogleMaps = (latitude, longitude) => {
+          let origin = '';
+          if (userLatitude.value && userLongitude.value) {
+              origin = `&origin=${userLatitude.value},${userLongitude.value}`;  // Use user's location
+          }
+          const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}${origin}&travelmode=driving`;
+          window.open(url, '_blank');
+      };
 
+      //Handles the "Get Directions" button click, checking for location permissions
+      const handleGetDirections = (latitude, longitude) => {
+          if (userLatitude.value && userLongitude.value) {
+              // Location already available, open Google Maps directly
+              openGoogleMaps(latitude, longitude);
+          } else {
+              // Location not available,  provide some feedback to the user.
+              alert('No se puede mostrar las indicaciones sin permiso de ubicación.');
+          }
+      };
+
+     const openInscriptionModal = (actividad) => {
+        selectedActividad.value = actividad;
+        showInscriptionModal.value = true;
+
+        nextTick(() => {
+            const inscriptionModalEl = document.querySelector('#inscriptionForm');
+
+            if (inscriptionModalEl) {
+                inscriptionModal.value = new Modal(inscriptionModalEl);
+                inscriptionModal.value.show();
+            } else {
+                console.error('Modal element not found in the DOM.');
+            }
+        });
+    };
+    const handleInscriptionSuccess = (data) => {
+        console.log("Inscripción exitosa en el componente padre:", data);
+        closeInscriptionModal();
+    };
+    const handleInscriptionError = (error) => {
+        console.error("Error en la inscripción en el componente padre:", error);
+    };
+    const closeInscriptionModal = () => {
+        if (inscriptionModal.value) {
+            inscriptionModal.value.hide();
+        }
+        showInscriptionModal.value = false;
+        selectedActividad.value = null;
+    };
 
     return {
       actividades,
@@ -402,7 +492,20 @@ export default {
       handleInscriptionSuccess,
       handleInscriptionError,
       showInscriptionModal,
-      closeInscriptionModal
+      closeInscriptionModal,
+
+      //Location
+      showLocationModal,
+      showLocationExplanation,
+      handleAllowLocation,
+      handleDenyLocation,
+      closeExplanation,
+      getLocation,
+      userLatitude,
+      userLongitude,
+       calculateDistanceToCentroCivico,
+       openGoogleMaps,
+       handleGetDirections
     };
   }
 };
@@ -606,6 +709,67 @@ hr {
   transform: scale(0.95);
 }
 
+
+.cssbuttons-io2 {
+  border-radius: 55px;
+  margin-bottom: 1em;
+  margin-left: .5em;
+  border: none;
+  background: linear-gradient(to right, #00ffbcc8, #00ffbc);
+  /* Degradado */
+  color: black;
+  /* Letras negras por defecto */
+  overflow: hidden;
+  transition: all 0.4s;
+  /* Transición para todas las propiedades */
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cssbuttons-io2 span {
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: -0.07em;
+  font-size: 1em;
+  font-family: Inter;
+  /* Usar Inter */
+  padding: 0px 24px 0px 20px;
+  cursor: pointer;
+}
+
+.cssbuttons-io2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(0, 0, 0);
+  /* Fondo blanco por defecto */
+  z-index: -1;
+  /* Poner el degradado detrás del texto */
+  transform: translateX(-100%);
+  /* Ocultar el degradado inicialmente */
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+  /* Transición para la animación */
+}
+
+.cssbuttons-io2:hover {
+  color: rgb(255, 255, 255);
+  /* Letras negras al hacer hover */
+}
+
+.cssbuttons-io2:hover::before {
+  transform: translateX(0);
+  /* Mostrar el degradado al hacer hover */
+}
+
+.cssbuttons-io2 span:active {
+  transform: scale(0.95);
+}
+
 .activity-block .schedule {
   position: absolute;
   bottom: 20px;
@@ -635,7 +799,7 @@ hr {
   /* Adjust as needed to position below the title */
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1000;
+  z-index: 900;
   /* Ensure filters are above other content */
   width: 100%;
   /* Ancho completo */
@@ -772,5 +936,54 @@ hr {
       /* Aún más pequeño en móviles */
     }
   }
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top of everything */
+}
+
+.modal-content {
+    background-color: rgb(20, 20, 20);
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+.modal-content h3,
+.modal-content p {
+  color:rgb(225, 225, 225);
+font-family: Inter;
+font-weight: 300;
+letter-spacing: -0.05em;
+}
+.modal-content h3 {
+
+font-weight: 700;
+}
+.modal-buttons {
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 5px 15px;
+    border: none;
+    background-color: #00ffbc;
+    color: rgb(0, 0, 0);
+    border-radius: 4px;
+    cursor: pointer;
+    margin:0em 1em;
+}
+
+.modal-buttons button:hover {
+    background-color: #00ce97;
 }
 </style>
