@@ -18,6 +18,7 @@ const errorMessage = ref(null);
 const showAllCentrosCivicos = ref(false);
 const showAllActividades = ref(false);
 const searchQuery = ref("");
+const searchQueryTipos = ref(""); // Add this line
 
 const currentSection = ref("");
 const modifyingItem = ref({
@@ -32,7 +33,7 @@ const newItemDescription = ref("");
 const selectedTipoActividad = ref("");
 const selectedCentroCivico = ref("");
 const selectedMonitor = ref("");
-const newItemIdioma = ref("");
+const newItemIdioma = ref(null); // Set to null
 const newItemEdadMin = ref("");
 const newItemEdadMax = ref("");
 const newItemFecha = ref("");
@@ -46,9 +47,24 @@ const newItemUrl = ref("");
 const newItemTelefono = ref("");
 const newItemCorreo = ref("");
 
+const showAllTiposActividades = ref(false); // Add this line
+const tiposActividadesLoading = ref(false); // Add this line
+const tiposActividadesError = ref(null); // Add this line
+
 // Referencias a modales
 const modifyModal = ref(null);
 const addItemModal = ref(null);
+
+// Computed properties to filter displayed types
+const displayedTiposActividades = computed(() => {
+    let filtered = tiposActividades.value;
+    if (searchQueryTipos.value) {
+        filtered = filtered.filter(tipo =>
+            tipo.nombre.toLowerCase().includes(searchQueryTipos.value.toLowerCase())
+        );
+    }
+    return showAllTiposActividades.value ? filtered : filtered.slice(0, 6);
+});
 
 // Computed para mostrar solo ciertos elementos en la lista
 const displayedCentrosCivicos = computed(() =>
@@ -100,12 +116,15 @@ const fetchMonitores = async () => {
 };
 
 const fetchTiposActividades = async () => {
-  try {
-    const response = await api.get("/categorias");
-    tiposActividades.value = response.data;
-  } catch (error) {
-    console.error("Error al cargar tipos de actividades:", error);
-  }
+    tiposActividadesLoading.value = true;
+    try {
+        const response = await api.get("/tipos_actividades");
+        tiposActividades.value = response.data;
+    } catch (error) {
+        tiposActividadesError.value = error.message || "Error al cargar los Tipos de Actividades";
+    } finally {
+        tiposActividadesLoading.value = false;
+    }
 };
 
 // Mostrar modales
@@ -116,6 +135,7 @@ const showAddItemPopup = (section) => {
   selectedTipoActividad.value = "";
   selectedCentroCivico.value = "";
   selectedMonitor.value = "";
+  newItemIdioma.value = null; // Reset value
   errorMessage.value = null;
 
   const modalElement = addItemModal.value;
@@ -147,24 +167,40 @@ const toggleShowAllActividades = () => {
   showAllActividades.value = !showAllActividades.value;
 };
 
+const toggleShowAllTiposActividades = () => {
+    showAllTiposActividades.value = !showAllTiposActividades.value;
+};
+
 // Guardar modificaciones
 const saveModification = async () => {
   if (!modifyingItem.value || !modifyingItem.value.nombre) {
     errorMessage.value = "El nombre no puede estar vacío.";
     return;
   }
+
   try {
     await api.put(`/${currentSection.value}/${modifyingItem.value.id}`, modifyingItem.value);
+    console.log("Modificación guardada:", modifyingItem.value);
+    console.log("Sección actual:", currentSection.value);
+
+    // Actualizar la lista según la sección
     if (currentSection.value === "centro_civico") {
       fetchCentrosCivicos();
-    } else {
+    } else if (currentSection.value === "actividades") {
       fetchActividades();
+    } else if (currentSection.value === "tipos_actividades") {
+      fetchTiposActividades(); // Asegúrate de tener esta función en tu código
     }
-    modifyModal.value.hide();
+
+    // Cerrar el modal después de guardar los cambios
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modifyModal"));
+    if (modal) modal.hide();
+
   } catch (error) {
     errorMessage.value = error.message || "Error al guardar los cambios.";
   }
 };
+
 
 // Añadir nuevo item
 const confirmAddItem = async () => {
@@ -179,15 +215,15 @@ const confirmAddItem = async () => {
     newItem = {
       nombre: newItemName.value,
       descripcion: newItemDescription.value || "",
-      idioma: newItemIdioma.value || "", // Asegúrate de incluir el idioma si es necesario
-      edad_min: newItemEdadMin.value || null, // Asegúrate de enviar una edad mínima si es necesario
-      edad_max: newItemEdadMax.value || null, // Asegúrate de enviar una edad máxima si es necesario
-      id_centro_civico: selectedCentroCivico.value, // Aquí estamos enviando el ID del centro cívico
-      id_tipo_actividad: selectedTipoActividad.value, // Aquí estamos enviando el ID del tipo de actividad
-      id_monitor: selectedMonitor.value, // Aquí estamos enviando el ID del monitor
-      fecha: newItemFecha.value || "",  // La fecha seleccionada por el usuario
-      hora_inicio: newItemHoraInicio.value || "",  // La hora de inicio seleccionada
-      hora_fin: newItemHoraFin.value || "",  // La hora de fin seleccionada
+      idioma: newItemIdioma.value || null, // Changed null
+      edad_min: newItemEdadMin.value || null,
+      edad_max: newItemEdadMax.value || null,
+      id_centro_civico: selectedCentroCivico.value,
+      id_tipo_actividad: selectedTipoActividad.value,
+      id_monitor: selectedMonitor.value,
+      fecha: newItemFecha.value || "",
+      hora_inicio: newItemHoraInicio.value || "",
+      hora_fin: newItemHoraFin.value || "",
     };
   } else if (currentSection.value === "centro_civico") {
     newItem = {
@@ -199,26 +235,44 @@ const confirmAddItem = async () => {
       telefono: newItemTelefono.value || "",
       correo: newItemCorreo.value || "",
     };
+  } else if (currentSection.value === "tipos_actividades") {
+    newItem = {
+      nombre: newItemName.value,
+      descripcion: newItemDescription.value || "",
+      multimedia: "src/assets/img/default.png", // Set default multimedia URL here
+    };
   } else {
     errorMessage.value = "Sección no válida.";
     return;
   }
 
-  console.log('Datos enviados con newItem:', newItem);
-
+  console.log("Datos enviados con newItem:", newItem);
 
   try {
     await api.post(`/${currentSection.value}`, newItem);
+
     if (currentSection.value === "centro_civico") {
       fetchCentrosCivicos();
-    } else {
+    } else if (currentSection.value === "actividades") {
       fetchActividades();
+    } else if (currentSection.value === "tipos_actividades") {
+      fetchTiposActividades(); // Agregamos la función para refrescar la lista
     }
-    addItemModal.value.hide();
   } catch (error) {
     errorMessage.value = error.message || "Error al añadir el nuevo ítem.";
+  } finally {
+      // Close the modal after the request has completed, whether it succeeds or fails
+      const modalElement = addItemModal.value;
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalInstance) {
+          modalInstance.hide();
+      }
   }
+  //Reset the form
+  newItemName.value = "";
+  newItemDescription.value = "";
 };
+
 
 // Cargar datos al montar el componente
 onMounted(() => {
@@ -236,9 +290,9 @@ onMounted(() => {
         <div class="col">
           <div class="card custom-card h-100">
             <div class="card-header custom-card-header d-flex align-items-center">
-              <h5 class="card-title mb-0 text-dark me-auto">Centros Cívicos</h5>
-              <button @click="showAddItemPopup('centro_civico')" class="btn btn-sm btn-secondary bg-info w-25">
-                <i class="bi bi-plus-lg"></i> Añadir
+              <h2 class="card-title mb-0 text-white me-auto dirtyline-font">cenTros cívicOs</h2>
+              <button @click="showAddItemPopup('centro_civico')" class="cssbuttons-io2">
+                <span>Añadir</span> 
               </button>
             </div>
             <div class="card-body">
@@ -254,7 +308,7 @@ onMounted(() => {
                   :key="centro.id"
                   class="list-group-item d-flex justify-content-between align-items-center custom-list-item"
                 >
-                  <span class="text-dark">{{ centro.nombre }}</span>
+                  <span class="text-white inter-font">{{ centro.nombre }}</span>
                   <div>
                     <button @click="showModifyPopup(centro, 'centro_civico')" class="btn btn-sm btn-outline-secondary">
                       <i class="bi bi-pencil"></i>
@@ -278,9 +332,9 @@ onMounted(() => {
         <div class="col">
           <div class="card custom-card h-100">
             <div class="card-header custom-card-header d-flex align-items-center">
-              <h5 class="card-title mb-0 text-dark me-auto">Actividades</h5>
-              <button @click="showAddItemPopup('actividades')" class="btn btn-sm btn-secondary bg-info w-25">
-                <i class="bi bi-plus-lg"></i> Añadir
+              <h2 class="card-title mb-0 text-white me-auto dirtyline-font">actiVidades</h2>
+              <button @click="showAddItemPopup('actividades')" class="cssbuttons-io2">
+                <span>Añadir</span> 
               </button>
             </div>
             <div class="card-body">
@@ -302,7 +356,7 @@ onMounted(() => {
                   :key="actividad.id"
                   class="list-group-item d-flex justify-content-between align-items-center custom-list-item"
                 >
-                  <span class="text-dark">{{ actividad.nombre }}</span>
+                  <span class="text-white inter-font">{{ actividad.nombre }}</span>
                   <div>
                     <button @click="showModifyPopup(actividad, 'actividades')" class="btn btn-sm btn-outline-secondary">
                       <i class="bi bi-pencil"></i>
@@ -322,6 +376,55 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <!-- Tipos de Actividades Section -->
+      <div class="col my-2">
+        <div class="card custom-card h-100">
+          <div class="card-header custom-card-header d-flex align-items-center">
+            <h2 class="card-title mb-0 text-white me-auto dirtyline-font">tipoS de actividAdes</h2>
+            <button @click="showAddItemPopup('tipos_actividades')" class="cssbuttons-io2">
+                <span>Añadir</span> 
+              </button>
+          </div>
+          <div class="card-body">
+            <input
+              v-model="searchQueryTipos"
+              type="text"
+              class="form-control mb-3 custom-input"
+              placeholder="Buscar tipo de actividad por nombre"
+            />
+            <div v-if="tiposActividadesLoading" class="text-center">
+              <div class="spinner-border text-secondary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+            <div v-else-if="tiposActividadesError" class="alert alert-danger">{{ tiposActividadesError }}</div>
+            <ul v-else class="list-group list-group-flush">
+              <li
+                v-for="tipo in displayedTiposActividades"
+                :key="tipo.id"
+                class="list-group-item d-flex justify-content-between align-items-center custom-list-item"
+              >
+                <span class="text-white inter-font">{{ tipo.nombre }}</span>
+                <div>
+                  <button @click="showModifyPopup(tipo, 'tipos_actividades')" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                </div>
+              </li>
+            </ul>
+            <div v-if="tiposActividades.length > 6" class="d-flex justify-content-center">
+              <button
+                @click="toggleShowAllTiposActividades"
+                class="btn btn-link btn-sm mt-2 text-secondary custom-show-more-btn"
+              >
+                {{ showAllTiposActividades ? 'Mostrar menos' : 'Mostrar más' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
   
       <!-- Modify Modal -->
       <div
@@ -335,7 +438,7 @@ onMounted(() => {
         <div class="modal-dialog">
           <div class="modal-content custom-modal">
             <div class="modal-header custom-modal-header">
-              <h5 class="modal-title text-dark" id="modifyModalLabel">
+              <h5 class="modal-title text-white" id="modifyModalLabel">
                 Modificar {{ currentSection }}
               </h5>
               <button
@@ -346,12 +449,13 @@ onMounted(() => {
               ></button>
             </div>
             <div class="modal-body">
-              <!-- Para cualquier sección excepto 'actividades' y 'centro_civico' -->
+              <!-- Para cualquier sección excepto 'actividades', 'centro_civico' y 'tipos_actividades' -->
               <input
-                v-if="currentSection !== 'actividades' && currentSection !== 'centro_civico' && modifyingItem"
+                v-if="currentSection !== 'actividades' && currentSection !== 'centro_civico' && currentSection !== 'tipos_actividades' && modifyingItem"
                 v-model="modifyingItem.nombre"
                 class="form-control custom-input"
                 placeholder="Nombre del ítem"
+                style="color: white;"
               />
 
               <!-- Modificar Actividades -->
@@ -361,29 +465,34 @@ onMounted(() => {
                   v-model="modifyingItem.nombre"
                   class="form-control custom-input mb-3"
                   placeholder="Nombre de la actividad"
+                   style="color: white;"
                 />
                 <textarea
                   v-model="modifyingItem.descripcion"
                   class="form-control custom-input mb-3"
                   placeholder="Descripción de la actividad"
                   rows="3"
+                   style="color: white;"
                 ></textarea>
                 <input
                   v-model="modifyingItem.idioma"
                   class="form-control custom-input mb-3"
                   placeholder="Idioma"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.edad_min"
                   type="number"
                   class="form-control custom-input mb-3"
                   placeholder="Edad mínima"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.edad_max"
                   type="number"
                   class="form-control custom-input mb-3"
                   placeholder="Edad máxima"
+                   style="color: white;"
                 />
                 <select v-model="selectedTipoActividad" class="form-select custom-input mb-3">
                   <option value="" disabled selected>Seleccionar Tipo de Actividad</option>
@@ -412,11 +521,13 @@ onMounted(() => {
                   v-model="modifyingItem.nombre"
                   class="form-control custom-input mb-3"
                   placeholder="Nombre del Centro Cívico"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.ubicacion"
                   class="form-control custom-input mb-3"
                   placeholder="Ubicación"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.latitud"
@@ -424,6 +535,7 @@ onMounted(() => {
                   step="any"
                   class="form-control custom-input mb-3"
                   placeholder="Latitud"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.longitud"
@@ -431,24 +543,52 @@ onMounted(() => {
                   step="any"
                   class="form-control custom-input mb-3"
                   placeholder="Longitud"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.url"
                   type="url"
                   class="form-control custom-input mb-3"
                   placeholder="URL"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.telefono"
                   type="text"
                   class="form-control custom-input mb-3"
                   placeholder="Teléfono"
+                   style="color: white;"
                 />
                 <input
                   v-model="modifyingItem.correo"
                   type="email"
                   class="form-control custom-input mb-3"
                   placeholder="Correo electrónico"
+                   style="color: white;"
+                />
+              </template>
+
+              <!-- Modificar Tipos de Actividades -->
+              <template v-if="currentSection === 'tipos_actividades'">
+                <input
+                  v-if="modifyingItem"
+                  v-model="modifyingItem.nombre"
+                  class="form-control custom-input mb-3"
+                  placeholder="Nombre del tipo de actividad"
+                   style="color: white;"
+                />
+                <textarea
+                  v-model="modifyingItem.descripcion"
+                  class="form-control custom-input mb-3"
+                  placeholder="Descripción del tipo de actividad"
+                  rows="3"
+                   style="color: white;"
+                ></textarea>
+                <input
+                  v-model="modifyingItem.multimedia"
+                  class="form-control custom-input mb-3"
+                  placeholder="URL del archivo multimedia"
+                   style="color: white;"
                 />
               </template>
 
@@ -469,7 +609,6 @@ onMounted(() => {
         </div>
       </div>
 
-
   
       <!-- Add Item Modal -->
       <div
@@ -483,7 +622,7 @@ onMounted(() => {
         <div class="modal-dialog">
           <div class="modal-content custom-modal">
             <div class="modal-header custom-modal-header">
-              <h5 class="modal-title text-dark" id="addItemModalLabel">Añadir {{ currentSection }}</h5>
+              <h5 class="modal-title text-white" id="addItemModalLabel">Añadir {{ currentSection }}</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -493,6 +632,7 @@ onMounted(() => {
                 class="form-control custom-input mb-3"
                 placeholder="Nombre del nuevo item"
                 required
+                style="color: white;"
               />
 
               <!-- Inputs específicos para Centro Cívico -->
@@ -502,6 +642,7 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Ubicación"
                   required
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemLatitud"
@@ -510,6 +651,7 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Latitud"
                   required
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemLongitud"
@@ -518,22 +660,26 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Longitud"
                   required
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemUrl"
                   class="form-control custom-input mb-3"
-                  placeholder="URL (opcional)"
+                  placeholder="URL"
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemTelefono"
                   class="form-control custom-input mb-3"
-                  placeholder="Teléfono (opcional)"
+                  placeholder="Teléfono"
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemCorreo"
                   type="email"
                   class="form-control custom-input mb-3"
-                  placeholder="Correo Electrónico (opcional)"
+                  placeholder="Correo Electrónico"
+                  style="color: white;"
                 />
               </template>
 
@@ -544,23 +690,26 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Descripción de la actividad"
                   rows="3"
+                  style="color: white;"
                 ></textarea>
-                <input
-                  v-model="newItemIdioma"
-                  class="form-control custom-input mb-3"
-                  placeholder="Idioma"
-                />
+                <select v-model="newItemIdioma" class="form-select custom-input mb-3">
+                  <option value="" disabled selected>Seleccionar Idioma</option>
+                  <option value="Euskera">Euskera</option>
+                  <option value="Español">Español</option>
+                </select>
                 <input
                   v-model="newItemEdadMin"
                   type="number"
                   class="form-control custom-input mb-3"
                   placeholder="Edad mínima"
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemEdadMax"
                   type="number"
                   class="form-control custom-input mb-3"
                   placeholder="Edad máxima"
+                   style="color: white;"
                 />
                 <select
                   v-model="selectedTipoActividad"
@@ -609,6 +758,7 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Fecha de la actividad"
                   required
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemHoraInicio"
@@ -616,6 +766,7 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Hora de inicio"
                   required
+                  style="color: white;"
                 />
                 <input
                   v-model="newItemHoraFin"
@@ -623,10 +774,24 @@ onMounted(() => {
                   class="form-control custom-input mb-3"
                   placeholder="Hora de fin"
                   required
+                  style="color: white;"
                 />
               </template>
 
-              <div v-if="errorMessage" class="alert alert-danger mt-3">{{ errorMessage }}</div>
+              <!-- Inputs para Tipos de Actividades -->
+              <template v-if="currentSection === 'tipos_actividades'">
+                <textarea
+                  v-model="newItemDescription"
+                  class="form-control custom-input mb-3"
+                  placeholder="Descripción del tipo de actividad"
+                  rows="3"
+                   style="color: white;"
+                ></textarea>
+              </template>
+
+              <div v-if="errorMessage" class="alert alert-danger mt-3">
+                {{ errorMessage }}
+              </div>
             </div>
             <div class="modal-footer custom-modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -637,3 +802,168 @@ onMounted(() => {
       </div>
     </div>
   </template>
+
+<style scoped>
+/* Import fonts */
+@font-face {
+  font-family: 'Dirtyline';
+  src: url('../assets/fonts/Dirtyline.ttf') format('truetype');
+}
+
+.dirtyline-font {
+  font-family: 'Dirtyline', sans-serif;
+}
+
+.inter-font {
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.05em;
+}
+
+/* Base styles */
+.container-fluid {
+  color: white;
+}
+
+.card {
+  background-color: black;
+  color: white;
+}
+
+.card-header {
+  background-color: #212529; /* Dark header color */
+  border-bottom: 1px solid #495057; /* Dark border */
+}
+
+.card-title {
+  color: white;
+}
+
+.list-group-item {
+  background-color: black;
+  color: white;
+  border: none; /* Remove borders for a cleaner look */
+}
+
+.list-group-item:hover {
+  background-color: #343a40; /* Slightly lighter on hover */
+}
+
+/* Buttons */
+.btn-secondary {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+/* Custom input styles */
+.form-control {
+  background-color: #343a40;
+  border: 1px solid #495057;
+  color: white;
+}
+
+.form-control::placeholder { /* Add this */
+  color: white;
+  opacity: 0.7; /* Optional: make the placeholder a bit more subtle */
+}
+
+.form-control:focus {
+  background-color: #343a40;
+  border-color: #80bdff;
+  color: white;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Custom modal styles */
+.modal-content {
+  background-color: #212529;
+  color: white;
+}
+
+.modal-header {
+  background-color: #343a40;
+  border-bottom: 1px solid #495057;
+}
+
+.modal-title {
+  color: white;
+}
+
+.modal-footer {
+  border-top: 1px solid #495057;
+}
+
+.custom-show-more-btn {
+  color: #6c757d !important; /* Keep the show more button color */
+}
+
+
+
+
+
+
+
+.cssbuttons-io2 {
+  border-radius: 5px;
+  border: none;
+  background: linear-gradient(to right, #ffffffc8, #cbcbcb);
+  /* Degradado */
+  color: #252525;
+  /* Letras negras por defecto */
+  overflow: hidden;
+  transition: all 0.4s;
+  /* Transición para todas las propiedades */
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+
+}
+
+.cssbuttons-io2 span {
+  font-weight: 500;
+  font-style: italic;
+  font-size: 1.3em;
+  letter-spacing: 0.03em;
+  font-family: Dirtyline;
+  padding: 5px 20px 0px 20px;
+  cursor: pointer;
+}
+
+.cssbuttons-io2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  /* Fondo blanco por defecto */
+  z-index: -1;
+  /* Poner el degradado detrás del texto */
+  transform: translateX(-100%);
+  /* Ocultar el degradado initially */
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+  /* Transición para la animación */
+}
+
+.cssbuttons-io2:hover {
+  color: black;
+  /* Letras negras al hacer hover */
+}
+
+.cssbuttons-io2:hover::before {
+  transform: translateX(0);
+  /* Mostrar el degradado al hacer hover */
+}
+
+.cssbuttons-io2 span:active {
+  transform: scale(0.95);
+}
+
+</style>
