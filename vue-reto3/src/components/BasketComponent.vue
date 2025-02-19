@@ -86,11 +86,27 @@
                 <div class="col-3 col-md-3 px-0">
                   <p class="center" style="font-size: 1em;">Centro Cívico:</p>
                   <p class="center bold"> {{ actividad.centro_civico ? actividad.centro_civico.nombre : 'N/A' }}</p>
+                  <p v-if="userLatitude && userLongitude && actividad.centro_civico">
+                    Distancia: {{ calculateDistanceToCentroCivico(actividad.centro_civico.latitud, actividad.centro_civico.longitud) }} km
+                  </p>
+                  
                 </div>
                 <div class="col-4 col-md-4 d-flex justify-content-center align-items-center">
-                  <button class="cssbuttons-io" @click="openInscriptionModal(actividad)">
+                  <div class="row">
+                    <div class="col-12">
+                      <button
+                      v-if="actividad.centro_civico && userLatitude && userLongitude"
+                      @click="handleGetDirections(actividad.centro_civico.latitud, actividad.centro_civico.longitud)"
+                    class=" cssbuttons-io2">
+                    <span>Cómo llegar</span> 
+                  </button>
+                    </div>
+                    <div class="col-12">
+                      <button class="cssbuttons-io" @click="openInscriptionModal(actividad)">
                     <span>¡Inscríbete!</span>
                   </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -99,7 +115,8 @@
         <div class="scroll-fade"></div>
       </div>
     </div>
-    <!-- Modal de inscripción (renderizado condicionalmente) -->
+
+    <!-- Inscription Modal -->
     <InscriptionForm
       v-if="showInscriptionModal"
       :actividad="selectedActividad"
@@ -107,11 +124,23 @@
       @inscription-error="handleInscriptionError"
       @close="closeInscriptionModal"
     />
+
+    <!-- Location Permission Modal -->
+    <div v-if="showLocationModal" class="modal">
+      <div class="modal-content">
+        <h3>¿Permitir acceso a tu ubicación?</h3>
+        <p>Necesitamos tu ubicación para mostrar las actividades más cercanas.</p>
+        <div class="modal-buttons">
+          <button @click="handleAllowLocation">Permitir</button>
+          <button @click="handleDenyLocation">Denegar</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { computed, ref, onMounted, watch, nextTick } from 'vue';
+import { computed, ref, onMounted, nextTick } from 'vue';
 import useActividades from '../composables/useActividades';
 import useCategorias from "../composables/useCategorias"
 import InscriptionForm from './InscriptionForm.vue';
@@ -155,6 +184,7 @@ export default {
 
     const userLatitude = ref(null);
     const userLongitude = ref(null);
+    const showLocationModal = ref(false);
 
     const filteredActividades = computed(() => {
       let filtered = [...actividades.value];
@@ -246,11 +276,22 @@ export default {
 
     const handleCentroCivicoChange = () => {
       if (selectedCentroCivico.value === 'ubicacion') {
-        getLocation()
+        // Show the location permission modal
+        showLocationModal.value = true;
       } else {
         applyFilters()
       }
     }
+
+    const handleAllowLocation = () => {
+      showLocationModal.value = false;
+      getLocation();
+    };
+
+    const handleDenyLocation = () => {
+      showLocationModal.value = false;
+      selectedCentroCivico.value = '';
+    };
 
     const getLocation = () => {
       if ("geolocation" in navigator) {
@@ -348,6 +389,36 @@ export default {
     function deg2rad(deg) {
       return deg * (Math.PI / 180)
     }
+
+    const calculateDistanceToCentroCivico = (centroCivicoLat, centroCivicoLon) => {
+      if (userLatitude.value !== null && userLongitude.value !== null && centroCivicoLat && centroCivicoLon) {
+        const distance = calculateDistance(
+          userLatitude.value,
+          userLongitude.value,
+          centroCivicoLat,
+          centroCivicoLon
+        );
+        return distance.toFixed(2); // Retornar la distancia con dos decimales
+      } else {
+        return 'N/A'; // Retornar 'N/A' si las coordenadas no están disponibles
+      }
+    };
+
+    // Function to open Google Maps with directions
+    const openGoogleMaps = (latitude, longitude) => {
+      let origin = '';
+      if (userLatitude.value && userLongitude.value) {
+        origin = `&origin=${userLatitude.value},${userLongitude.value}`;  // Use user's location
+      }
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}${origin}&travelmode=driving`;
+      window.open(url, '_blank');
+    };
+
+        //Handles the "Get Directions" button click
+    const handleGetDirections = (latitude, longitude) => {
+      openGoogleMaps(latitude, longitude);
+    };
+
      // Función para abrir el modal de inscripción
     const openInscriptionModal = (actividad) => {
       selectedActividad.value = actividad;
@@ -411,7 +482,13 @@ export default {
       handleInscriptionSuccess,
       handleInscriptionError,
       showInscriptionModal,
-      closeInscriptionModal
+      closeInscriptionModal,
+      calculateDistanceToCentroCivico,
+      openGoogleMaps,
+      handleGetDirections,
+      showLocationModal,
+      handleAllowLocation,
+      handleDenyLocation,
     };
   }
 };
@@ -600,6 +677,66 @@ hr {
   transform: scale(0.95);
 }
 
+
+.cssbuttons-io2 {
+  border-radius: 55px;
+  margin-bottom: 1em;
+  margin-left: .5em;
+  border: none;
+  background: linear-gradient(to right, #f9a01bc8, #f9a01b);
+  /* Degradado */
+  color: #98002e;
+  /* Letras negras por defecto */
+  overflow: hidden;
+  transition: all 0.4s;
+  /* Transición para todas las propiedades */
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cssbuttons-io2 span {
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.5em;
+  font-family: Thunder;
+  padding: 3px 24px 0px 20px;
+  cursor: pointer;
+}
+
+.cssbuttons-io2::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  /* Fondo blanco por defecto */
+  z-index: -1;
+  /* Poner el degradado detrás del texto */
+  transform: translateX(-100%);
+  /* Ocultar el degradado initially */
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+  /* Transición para la animación */
+}
+
+.cssbuttons-io2:hover {
+  color: black;
+  /* Letras negras al hacer hover */
+}
+
+.cssbuttons-io2:hover::before {
+  transform: translateX(0);
+  /* Mostrar el degradado al hacer hover */
+}
+
+.cssbuttons-io2 span:active {
+  transform: scale(0.95);
+}
+
+
 .activity-block .schedule {
   position: absolute;
   bottom: 20px;
@@ -766,4 +903,75 @@ hr {
     }
   }
 }
+
+.get-directions-button {
+  border-radius: 55px;
+  margin-bottom: -0.2em;
+  margin-left: 0.5em;
+  border: none;
+  background: linear-gradient(to right, #f9a01bc8, #f9a01b);
+  /* Degradado */
+  color: #98002e;
+  transition: 0.5s;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+.get-directions-button:hover {
+  background: linear-gradient(to right, #ffffffc8, #ffffff);
+  color:black; /* Darker green on hover */
+}
+
+.get-directions-button i {
+  margin-right: 5px; /* Space between icon and text */
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top of everything */
+}
+
+.modal-content {
+    background-color: rgb(20, 20, 20);
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+.modal-content h3,
+.modal-content p {
+  color:rgb(225, 225, 225);
+font-family: Inter;
+font-weight: 300;
+letter-spacing: -0.05em;
+}
+.modal-content h3 {
+
+font-weight: 700;
+}
+.modal-buttons {
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 5px 15px;
+    border: none;
+    background-color: #98002e;
+    color: rgb(255, 255, 255);
+    border-radius: 4px;
+    cursor: pointer;
+    margin:0em 1em;
+}
+
+.modal-buttons button:hover {
+    background-color: #840027;
+}
+
 </style>

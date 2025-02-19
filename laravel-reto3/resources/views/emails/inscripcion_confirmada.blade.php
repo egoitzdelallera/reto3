@@ -9,12 +9,7 @@
             line-height: 1.6;
             color: #333;
         }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-        }
+        
         h1 {
             color: #0056b3;
         }
@@ -28,9 +23,8 @@
             border: 1px solid #eee;
         }
         .activity-image {
-            max-width: 100%;
+            max-width: 80%;
             height: auto;
-            margin-bottom: 10px;
         }
         .footer {
             margin-top: 30px;
@@ -40,6 +34,9 @@
     </style>
 </head>
 <body>
+<div class="container" style="width: 100%; margin: 0 auto;">
+        <img src="https://inigoberastegi.com/wp-content/uploads/2025/02/banner-12.png" alt="Imagen de la actividad" class="activity-image" style="max-width: 100%; height: auto;">
+    </div>
     <p>Hola {{ $nombre }},</p>
     <p>Tu inscripción a la actividad <strong>{{ $actividadNombre }}</strong> se ha completado con éxito.</p>
     <p>¡Te esperamos!</p>

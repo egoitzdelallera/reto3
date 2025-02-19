@@ -4,8 +4,7 @@
     <div class="modal-dialog ">
       <div class="modal-content bg-black text-white">
         <div class="modal-header">
-          <h5 class="modal-title" id="inscriptionModalLabel">Inscripción a la actividad: {{ actividad ? actividad.nombre : '' }}
-          </h5>
+          <h5 class="modal-title" id="inscriptionModalLabel">Inscripción a la Actividad: {{ actividad ? actividad.nombre : '' }}</h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -196,6 +195,7 @@ export default {
 </script>
 
 <style scoped>
+
 /* Puedes agregar estilos específicos para el formulario aquí si es necesario */
 .form-label {
   color: white; /* Cambia el color de las etiquetas a blanco */

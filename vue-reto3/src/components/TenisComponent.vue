@@ -194,6 +194,7 @@ import { computed, ref, onMounted } from 'vue';
 import useActividades from '../composables/useActividades';
 import useCategorias from '../composables/useCategorias';
 
+
 export default {
   setup() {
     const { actividades, loading, error, fetchActividades, categoryId, setCategory } =
@@ -809,6 +810,65 @@ hr {
   transform: scale(0.95);
 }
 
+.cssbuttons-io2 {
+  border-radius: 55px;
+  margin-bottom: 1em;
+  margin-left: 0.5em;
+  border: none;
+  background: linear-gradient(to right, #f0f0f0c8, #f0f0f0);
+  /* Degradado */
+  color: #313a0a;
+  /* Letras negras por defecto */
+  overflow: hidden;
+  transition: all 0.4s;
+  /* Transición para todas las properties */
+  position: relative;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cssbuttons-io2 span {
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.2em;
+  font-family: Heaven, sans-serif;
+  padding: 3px 24px 0px 20px;
+  cursor: pointer;
+}
+
+.cssbuttons-io2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  /* Fondo blanco por defecto */
+  z-index: -1;
+  /* Poner el degradado detrás del texto */
+  transform: translateX(-100%);
+  /* Ocultar el degradado initially */
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+  /* Transición para la animación */
+}
+
+.cssbuttons-io2:hover {
+  color: #f0f0f0;
+  /* Letras negras al hacer hover */
+}
+
+.cssbuttons-io2:hover::before {
+  transform: translateX(0);
+  /* Mostrar el degradado al hacer hover */
+}
+
+.cssbuttons-io2 span:active {
+  transform: scale(0.95);
+}
+
+
 .activity-block .schedule {
   position: absolute;
   bottom: 20px;
@@ -876,79 +936,77 @@ hr {
   color: #f0f0f0;
 
   margin: 0 auto;
-  /* Centra horizontalmente */
   max-width: 600px;
-  /* Ancho máximo del filtro */
+
 }
 
 .filtro select {
-  background-color: transparent !important;
-  color: #f0f0f0;
-  border: 0px;
-  padding: 10px;
-  font-family: Inter;
-  font-weight: 300;
-  letter-spacing: -0.03em;
+background-color: transparent !important;
+color: #f0f0f0;
+border: 0px;
+padding: 10px;
+font-family: Inter;
+font-weight: 300;
+letter-spacing: -0.03em;
 }
 
 .filtro option {
-  background-color: #000000;
-  color: #f0f0f0;
+background-color: #000000;
+color: #f0f0f0;
 }
 
 .font-weight-bold {
-  font-weight: bold;
+font-weight: bold;
 }
 
-/* Responsive design */
 @media (max-width: 1024px) {
-  .container {
-    flex-direction: column;
-    align-items: stretch;
-    background: none;
-    background-color: #313a0a; /* Asegura que el color de fondo se mantenga */
-  }
+.container {
+flex-direction: column;
+align-items: stretch;
+background: none;
+background-color: #313a0a;
+}
 
-  .titulo {
-    margin: 2em 0em;
-    margin-left: 0;
-    text-align: center;
-  }
+.titulo {
+margin: 2em 0em;
+margin-left: 0;
+text-align: center;
+}
 
-  .titulo h1 {
-    font-size: 2em;
-    text-align: center;
-  }
+.titulo h1 {
+font-size: 2em;
+text-align: center;
+}
 
-  .filters {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none;
-    padding: 10px;
-    width: 90%;
-    box-sizing: border-box;
-  }
+.filters {
+position: relative;
+top: auto;
+left: auto;
+transform: none;
+padding: 10px;
+width: 90%;
+box-sizing: border-box;
+}
 
-  .filtro {
-    max-width: 100%;
-    flex-direction: column;
-  }
+.filtro {
+max-width: 100%;
+flex-direction: column;
+}
 
-  .filtro select {
-    margin-bottom: 0.5em;
-    width: 95%;
-    box-sizing: border-box;
-  }
+.filtro select {
+margin-bottom: 0.5em;
+width: 95%;
+box-sizing: border-box;
+}
 
-  .right-side-scrollable {
-    width: 100%;
-    margin-top: 1em;
-    margin-left: 0;
-    height: auto;
-    box-sizing: border-box;
-    padding: 20px; /* Añadido: Espaciado para el contenido */
-  }
+.right-side-scrollable {
+width: 100%;
+margin-top: 1em;
+margin-left: 0;
+height: auto;
+box-sizing: border-box;
+padding: 20px; /* Añadido: Espaciado para el contenido */
+}
 
   .right-side {
     padding: 0; /* Añadido: Elimina padding interno */
@@ -962,29 +1020,31 @@ hr {
     padding: 20px; /* Reduce el padding para que quepa en pantallas más pequeñas */
   }
 
-  .activity-block h2 {
-    font-size: 3em;
-  }
+.activity-block h2 {
+font-size: 3em;
+}
 
-  .activity-block p {
-    font-size: 1em;
-  }
+.activity-block p {
+font-size: 1em;
+}
 
   .cssbuttons-io {
     width: 100%; /* Boton ocupar todo el ancho*/
     display: flex;
     justify-content: center;
-  }
+    align-items: center;
+    z-index: 1000; /* Ensure it's on top of everything */
+}
 
   .cssbuttons-io span {
     font-size: 1.4em; /* Bajar tamaño de fuente del boton*/
   }
 
-  /* Ajustes para pantallas aún más pequeñas (móviles) */
-  @media (max-width: 576px) {
-    .titulo h1 {
-      font-size: 2em; /* Aún más pequeño en móviles */
-    }
+font-weight: 700;
+}
+.modal-buttons {
+    margin-top: 20px;
+}
 
     .activity-block .bold {
       font-size: 2.5em;

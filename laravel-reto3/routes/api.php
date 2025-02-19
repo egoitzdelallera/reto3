@@ -21,13 +21,23 @@ Route::get('/user', [UserController::class, 'user'])->name('user')->middleware('
 
 Route::controller(TiposActividadController::class)->group(function() {
     Route::get('categorias', 'index');
+    Route::get('tipos_actividades', 'index');
+    Route::post('tipos_actividades', 'store');
+    Route::put('tipos_actividades/{id}', 'update');
 });
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/actividades', [ActividadController::class, 'index']); // Todas las actividades de baloncesto
+    Route::get('/actividades', [ActividadController::class, 'index']);
     Route::post('/actividades', [ActividadController::class, 'store']);
     Route::put('/actividades/{id}', [ActividadController::class, 'update']);
     Route::delete('/actividades/{id}', [ActividadController::class, 'destroy']);
+});
+
+Route::controller(TiposActividadController::class)->group(function() {
+    Route::get('categorias', 'index');
+    Route::get('tipos_actividades', 'index');
+    Route::post('tipos_actividades', 'store');
+    Route::put('tipos_actividades/{id}', 'update');
 });
 
 Route::middleware('auth:api')->group(function () {
@@ -41,12 +51,6 @@ Route::get('/actividad/{id}', [ActividadController::class, 'show']);
 
 Route::controller(UserController::class)->group(function() {
     Route::post('inscribir', 'inscribir');
-});
-Route::middleware('auth:api')->group(function () {
-    Route::get('/centro_civico', [CentroCivicoController::class, 'index']);
-    Route::post('/centro_civico', [CentroCivicoController::class, 'store']);
-    Route::put('/centro_civico/{id}', [CentroCivicoController::class, 'update']);
-    Route::delete('/centro_civico/{id}', [CentroCivicoController::class, 'destroy']);
 });
 
 Route::get('/actividad/{id}', [ActividadController::class, 'show']);
