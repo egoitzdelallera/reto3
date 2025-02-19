@@ -159,21 +159,17 @@ export default {
       return categoria ? categoria.nombre.toUpperCase() : 'TENIS';
     });
 
-    // Local refs for filter selections
     const selectedCentroCivico = ref('');
     const selectedEdad = ref('');
     const selectedIdioma = ref('');
     const selectedHorario = ref('');
 
-    // Local ref for the selected category
     const selectedCategoryId = ref(null);
 
-    // Refs para el modal y la actividad seleccionada
     const inscriptionModal = ref(null);
     const selectedActividad = ref(null);
-    const showInscriptionModal = ref(false); // Controla si se muestra el modal
+    const showInscriptionModal = ref(false);
 
-    // Fetch centros civicos (replace with your actual data fetching)
     const centrosCivicos = ref([
       { id: 1, nombre: 'Ibaiondo' },
       { id: 2, nombre: 'Aldabe' },
@@ -189,12 +185,9 @@ export default {
     const filteredActividades = computed(() => {
       let filtered = [...actividades.value];
 
-      // Apply Centro Civico filter
       if (selectedCentroCivico.value) {
         if (selectedCentroCivico.value === 'all') {
-          // Do nothing, show all centers
         } else if (selectedCentroCivico.value === 'ubicacion') {
-          // Handled by getLocation and sorting
         } else {
           filtered = filtered.filter(actividad => {
             return actividad.centro_civico && actividad.centro_civico.id === parseInt(selectedCentroCivico.value);
@@ -202,7 +195,6 @@ export default {
         }
       }
 
-      // Apply Edad filter
       if (selectedEdad.value && selectedEdad.value !== 'all') {
         const selectedAge = parseInt(selectedEdad.value, 10);
         filtered = filtered.filter(actividad => {
@@ -210,16 +202,14 @@ export default {
         });
       }
 
-      // Apply Idioma filter
       if (selectedIdioma.value  && selectedIdioma.value !== 'all') {
-        if (selectedIdioma.value !== 'all') { // Check if a specific language is selected
+        if (selectedIdioma.value !== 'all') {
           filtered = filtered.filter(actividad => {
             return actividad.idioma === selectedIdioma.value;
           });
         }
       }
 
-      // Apply Horario filter
       if (selectedHorario.value  && selectedHorario.value !== 'all') {
         if (selectedHorario.value !== 'all') {
           filtered = filtered.filter(actividad => {
@@ -249,7 +239,6 @@ export default {
     const filteredAndSortedActividades = computed(() => {
       let filtered = [...filteredActividades.value];
       if (selectedCentroCivico.value === 'ubicacion' && userLatitude.value && userLongitude.value) {
-        // Sort by distance
         filtered.sort((a, b) => {
           const distanceA = calculateDistance(
             userLatitude.value,
@@ -270,13 +259,10 @@ export default {
     });
 
     const applyFilters = () => {
-      // No need to do anything here. The `filteredActividades` computed property
-      // will automatically recalculate when the filter refs change.
     };
 
     const handleCentroCivicoChange = () => {
       if (selectedCentroCivico.value === 'ubicacion') {
-        // Show the location permission modal
         showLocationModal.value = true;
       } else {
         applyFilters()
@@ -300,7 +286,6 @@ export default {
             userLatitude.value = position.coords.latitude
             userLongitude.value = position.coords.longitude
 
-            // Guardar en localStorage
             localStorage.setItem('userLatitude', userLatitude.value)
             localStorage.setItem('userLongitude', userLongitude.value)
 
@@ -309,33 +294,31 @@ export default {
           (error) => {
             console.error("Error obteniendo ubicación:", error)
             alert("No se pudo obtener la ubicación")
-            selectedCentroCivico.value = '' // Resetear la selección
+            selectedCentroCivico.value = '' 
           }
         )
       } else {
         alert("Tu navegador no soporta geolocalización")
-        selectedCentroCivico.value = '' // Resetear la selección
+        selectedCentroCivico.value = '' 
       }
     }
 
     const changeCategory = async () => {
       setCategory(selectedCategoryId.value);
-      await fetchActividades(); // Re-fetch activities for the new category
+      await fetchActividades(); 
     };
 
     onMounted(async () => {
       await fetchCategorias();
 
-      // Find the basket category (ID 2)
       const basketCategory = categorias.value.find(category => category.id === 2);
 
       if (basketCategory) {
-        selectedCategoryId.value = basketCategory.id;  // Set initial selection to basket category
-        setCategory(basketCategory.id);             // Set the category in the composable
-        await fetchActividades();                   // Fetch the basket activities
+        selectedCategoryId.value = basketCategory.id;  
+        setCategory(basketCategory.id);             
+        await fetchActividades();       
       } else {
         console.warn("Basket category (ID 2) not found. Loading first category instead.");
-        // Fallback: load the first category if basket isn't found
         if (categorias.value && categorias.value.length > 0) {
           selectedCategoryId.value = categorias.value[0].id;
           setCategory(categorias.value[0].id);
@@ -343,7 +326,6 @@ export default {
         }
       }
 
-      //Try to get the location from localStorage on component mount
       const storedLat = localStorage.getItem('userLatitude');
       const storedLng = localStorage.getItem('userLongitude');
 
@@ -353,14 +335,12 @@ export default {
       }
     });
 
-    // Helper function to get the day of the week
     const getDayOfWeek = (dateString) => {
       const date = new Date(dateString);
       const daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
       return daysOfWeek[date.getDay()];
     };
 
-    // Helper function to format date, day of week, and time
     const formatDateTime = (dateString, startTime, endTime) => {
       const date = new Date(dateString);
       const dayOfWeek = getDayOfWeek(dateString);
@@ -371,9 +351,8 @@ export default {
       return `${dayOfWeek}, ${formattedDate} - ${formattedStartTime} - ${formattedEndTime}`;
     };
 
-    // Helper function to calculate distance between two coordinates (Haversine formula)
     function calculateDistance(lat1, lon1, lat2, lon2) {
-      const R = 6371; // Radius of the earth in km
+      const R = 6371;
       const dLat = deg2rad(lat2 - lat1);
       const dLon = deg2rad(lon2 - lon1);
       const a =
@@ -382,7 +361,7 @@ export default {
         Math.sin(dLon / 2) * Math.sin(dLon / 2)
         ;
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      const distance = R * c; // Distance in km
+      const distance = R * c;
       return distance;
     }
 
@@ -398,13 +377,12 @@ export default {
           centroCivicoLat,
           centroCivicoLon
         );
-        return distance.toFixed(2); // Retornar la distancia con dos decimales
+        return distance.toFixed(2);
       } else {
-        return 'N/A'; // Retornar 'N/A' si las coordenadas no están disponibles
+        return 'N/A';
       }
     };
 
-    // Function to open Google Maps with directions
     const openGoogleMaps = (latitude, longitude) => {
       let origin = '';
       if (userLatitude.value && userLongitude.value) {
@@ -414,17 +392,14 @@ export default {
       window.open(url, '_blank');
     };
 
-        //Handles the "Get Directions" button click
     const handleGetDirections = (latitude, longitude) => {
       openGoogleMaps(latitude, longitude);
     };
 
-     // Función para abrir el modal de inscripción
     const openInscriptionModal = (actividad) => {
       selectedActividad.value = actividad;
-      showInscriptionModal.value = true; // Muestra el modal
+      showInscriptionModal.value = true; 
 
-      // Espera a que el DOM se actualice y luego inicializa el modal
       nextTick(() => {
         const inscriptionModalEl = document.getElementById('inscriptionModal');
         if (inscriptionModalEl) {
@@ -436,24 +411,20 @@ export default {
       });
     };
 
-    // Función para manejar el éxito de la inscripción
     const handleInscriptionSuccess = (data) => {
       console.log("Inscripción exitosa en el componente padre:", data);
       closeInscriptionModal();
     };
 
-    // Función para manejar el error de la inscripción
     const handleInscriptionError = (error) => {
-      // Realizar acciones de manejo de errores
     };
 
-    // Función para cerrar el modal
     const closeInscriptionModal = () => {
        if (inscriptionModal.value) {
-        inscriptionModal.value.hide(); // Cierra el modal de Bootstrap
+        inscriptionModal.value.hide(); 
       }
-      showInscriptionModal.value = false; // Oculta el componente InscriptionForm
-      selectedActividad.value = null; // Limpia la actividad seleccionada
+      showInscriptionModal.value = false; 
+      selectedActividad.value = null; 
     };
 
     return {
@@ -495,8 +466,6 @@ export default {
 </script>
 
 <style scoped>
-/* Styles - No change needed unless you want to adapt the new content */
-/* Base styles */
 .container {
   display: flex;
   font-family: sans-serif;
@@ -526,20 +495,16 @@ export default {
   color: #f9a01b;
 }
 
-/* Right side: Scrollable Activity Blocks */
 .right-side-scrollable {
   overflow-y: auto;
   position: relative;
-  /* Required for absolute positioning of fade */
   height: 100vh;
   padding: 20px 0px 20px 100px;
   margin-top: 5% 5% 0% 0%;
 }
 
-/* Scrollbar Styling */
 .right-side-scrollable::-webkit-scrollbar {
   width: 12px;
-  /* Width of the scrollbar */
 }
 
 .right-side-scrollable::-webkit-scrollbar-track {
@@ -549,15 +514,12 @@ export default {
 
 .right-side-scrollable::-webkit-scrollbar-thumb {
   background-color: #f9a01b;
-  /* Color of the scroll thumb */
   border-radius: 8px;
-  /* Rounded corners of the scroll thumb */
   width: 12px !important;
 }
 
 .right-side-scrollable::-webkit-scrollbar-thumb:hover {
   background-color: white;
-  /* Color of the scroll thumb on hover */
 }
 
 .right-side {
@@ -566,7 +528,6 @@ export default {
   padding: 20px;
 }
 
-/* Activity block styles */
 .activity-block {
   background-color: #98002e;
   border: 4px dashed #f9a01b;
@@ -654,23 +615,17 @@ hr {
   width: 100%;
   height: 100%;
   background-color: white;
-  /* Fondo blanco por defecto */
   z-index: -1;
-  /* Poner el degradado detrás del texto */
   transform: translateX(-100%);
-  /* Ocultar el degradado initially */
   transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
-  /* Transición para la animación */
 }
 
 .cssbuttons-io:hover {
   color: black;
-  /* Letras negras al hacer hover */
 }
 
 .cssbuttons-io:hover::before {
   transform: translateX(0);
-  /* Mostrar el degradado al hacer hover */
 }
 
 .cssbuttons-io span:active {
@@ -684,12 +639,9 @@ hr {
   margin-left: .5em;
   border: none;
   background: linear-gradient(to right, #f9a01bc8, #f9a01b);
-  /* Degradado */
   color: #98002e;
-  /* Letras negras por defecto */
   overflow: hidden;
   transition: all 0.4s;
-  /* Transición para todas las propiedades */
   position: relative;
   z-index: 10;
   display: inline-flex;
@@ -713,23 +665,17 @@ hr {
   width: 100%;
   height: 100%;
   background-color: white;
-  /* Fondo blanco por defecto */
   z-index: -1;
-  /* Poner el degradado detrás del texto */
   transform: translateX(-100%);
-  /* Ocultar el degradado initially */
   transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
-  /* Transición para la animación */
 }
 
 .cssbuttons-io2:hover {
   color: black;
-  /* Letras negras al hacer hover */
 }
 
 .cssbuttons-io2:hover::before {
   transform: translateX(0);
-  /* Mostrar el degradado al hacer hover */
 }
 
 .cssbuttons-io2 span:active {
@@ -743,46 +689,33 @@ hr {
   left: 20px;
 }
 
-/* Scroll Fade Effect */
 .scroll-fade {
   z-index: 998;
   position: sticky;
   bottom: -21px;
-  /* Adjusted to move the fade a bit lower */
   left: 0;
   width: 100%;
   height: 200px;
-  /* Increased the height of the fade */
   background: linear-gradient(to bottom, rgba(193, 39, 45, 0), #98002ed6, #98002e);
-  /* Gradient from transparent to #c1272d */
   pointer-events: none;
-  /* Ensure the fade doesn't interfere with scrolling */
 }
 
-/* Filters (Absolutely Positioned) */
 .filters {
   position: absolute;
   top: 100px;
-  /* Adjust as needed to position below the title */
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-  /* Ensure filters are above other content */
   width: 100%;
-  /* Ancho completo */
   padding: 0 15px;
-  /* Espacio a los lados */
   box-sizing: border-box;
-  /* Asegura que padding no aumente el ancho */
 }
 
 .filtro {
   background-color: black;
   color: white;
   margin: 0 auto;
-  /* Centra horizontalmente */
   max-width: 600px;
-  /* Ancho máximo del filtro */
 }
 
 .filtro select {
@@ -804,7 +737,6 @@ hr {
   font-weight: bold;
 }
 
-/* Responsive design */
 @media (max-width: 1024px) {
   .container {
     flex-direction: column;
@@ -852,23 +784,17 @@ hr {
     height: auto;
     box-sizing: border-box;
     padding: 20px;
-    /* Añadido: Espaciado para el contenido */
   }
 
   .right-side {
     padding: 0;
-    /* Añadido: Elimina padding interno */
   }
 
   .activity-block {
     width: 100%;
-    /* Ocupa todo el ancho disponible */
     margin-right: 0;
-    /* Elimina margen derecho */
     margin-bottom: 20px;
-    /* Restaura el margen inferior */
     padding: 20px;
-    /* Reduce el padding para que quepa en pantallas más pequeñas */
   }
 
   .activity-block h2 {
@@ -881,21 +807,17 @@ hr {
 
   .cssbuttons-io {
     width: 100%;
-    /* Boton ocupar todo el ancho*/
     display: flex;
     justify-content: center;
   }
 
   .cssbuttons-io span {
     font-size: 1.8em;
-    /* Bajar tamaño de fuente del boton*/
   }
 
-  /* Ajustes para pantallas aún más pequeñas (móviles) */
   @media (max-width: 576px) {
     .titulo h1 {
       font-size: 2em;
-      /* Aún más pequeño en móviles */
     }
 
     .activity-block .bold {
@@ -910,7 +832,6 @@ hr {
   margin-left: 0.5em;
   border: none;
   background: linear-gradient(to right, #f9a01bc8, #f9a01b);
-  /* Degradado */
   color: #98002e;
   transition: 0.5s;
   margin-bottom: 10px;
@@ -918,11 +839,11 @@ hr {
 }
 .get-directions-button:hover {
   background: linear-gradient(to right, #ffffffc8, #ffffff);
-  color:black; /* Darker green on hover */
+  color:black; 
 }
 
 .get-directions-button i {
-  margin-right: 5px; /* Space between icon and text */
+  margin-right: 5px;
 }
 
 /* Modal Styles */
@@ -932,11 +853,11 @@ hr {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.5); 
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999; /* Ensure it's on top of everything */
+    z-index: 9999; 
 }
 
 .modal-content {
